@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Phishing Link Checker</title>
+    <style>
+        :root {
+            --primary-color: #4a6bff;
+            --secondary-color: #f5f7ff;
+            --text-color: #333;
+            --white: #fff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --notification-color: #ff6b6b;
+            --dark-bg: #1a1a1a;
+            --dark-text: #f0f0f0;
+            --dark-secondary: #2d2d2d;
+            --dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --danger-color: #dc3545;
+            --info-bg: #fff5f5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 50px;
+            padding-bottom: 70px;
+        }
+
+        body.dark-mode {
+            background-color: var(--dark-bg);
+            color: var(--dark-text);
+        }
+
+        /* Header Styles */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            background-color: var(--white);
+            box-shadow: var(--shadow);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            border-bottom-left-radius: 30px;
+            border-bottom-right-radius: 30px;
+            height: 50px;
+        }
+
+        body.dark-mode header {
+            background-color: var(--dark-secondary);
+            box-shadow: var(--dark-shadow);
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            max-width: 50%;
+            overflow: hidden;
+        }
+
+        .logo {
+            height: 40px;
+            width: auto;
+            max-width: 100%;
+            object-fit: contain;
+        }
+
+        .app-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--primary-color);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        body.dark-mode .app-title {
+            color: #8ab4f8;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .balance-container {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .balance {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 12px;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: row-reverse;
+            gap: 5px;
+            transition: transform 0.3s;
+        }
+
+        .balance.update {
+            transform: scale(1.1);
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 18px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+            padding: 5px;
+            width: 15px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        body.dark-mode .icon-btn {
+            color: var(--dark-text);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: var(--notification-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .notification-badge.pulse {
+            animation: pulse 0.5s 2;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-toggle .fa-sun,
+        .theme-toggle .fa-moon {
+            transition: opacity 0.3s;
+        }
+
+        body.dark-mode .theme-toggle .fa-sun {
+            display: block;
+            opacity: 1;
+        }
+
+        body.dark-mode .theme-toggle .fa-moon {
+            display: none;
+            opacity: 0;
+        }
+
+        body:not(.dark-mode) .theme-toggle .fa-sun {
+            display: none;
+            opacity: 0;
+        }
+
+        body:not(.dark-mode) .theme-toggle .fa-moon {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Navigation Bar Styles */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: var(--white);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            z-index: 100;
+            transition: background-color 0.3s, box-shadow 0.3s;
+            border-top-left-radius: 30px;
+            border-top-right-radius: 30px;
+            height: 60px;
+        }
+
+        body.dark-mode .bottom-nav {
+            background-color: var(--dark-secondary);
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 12px;
+            transition: all 0.3s;
+            padding: 8px 12px;
+            position: relative;
+            flex: 1;
+            max-width: 33.33%;
+        }
+
+        body.dark-mode .nav-btn {
+            color: var(--dark-text);
+        }
+
+        .nav-btn i {
+            font-size: 20px;
+            margin-bottom: 4px;
+            transition: color 0.3s;
+        }
+
+        .nav-btn:hover i {
+            color: var(--primary-color);
+        }
+
+        .nav-btn.active i {
+            color: var(--primary-color);
+        }
+
+        .nav-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 700px;
+            margin: 50px auto;
+            padding: 0 16px;
+            flex: 1;
+        }
+
+        .header {
+            text-align: center;
+            color: #333;
+        }
+
+        body.dark-mode .header {
+            color: var(--dark-text);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        body.dark-mode .header h1 {
+            color: var(--dark-text);
+        }
+
+        .header span {
+            color: #d32f2f;
+            font-weight: bold;
+        }
+
+        body.dark-mode .header span {
+            color: #ff6b6b;
+        }
+
+        .checker-box {
+            background: white;
+            border-radius: 8px;
+            padding: 30px;
+            margin-top: 20px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+            color: #333;
+        }
+
+        body.dark-mode .checker-box {
+            background: var(--dark-secondary);
+            color: var(--dark-text);
+            box-shadow: var(--dark-shadow);
+        }
+
+        /* Input group centered */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* center horizontally */
+            gap: 12px;
+        }
+
+        /* URL box centered and with max-width */
+        #phishing-url {
+            width: 70%;
+            max-width: 520px;
+            min-width: 220px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            color: #333;
+            background: white;
+        }
+
+        body.dark-mode #phishing-url {
+            background-color: #333;
+            color: var(--dark-text);
+            border-color: #555;
+        }
+
+        #phishing-url:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(74, 107, 255, 0.06);
+        }
+
+        body.dark-mode #phishing-url:focus {
+            box-shadow: 0 0 0 4px rgba(74, 107, 255, 0.2);
+        }
+
+        body.dark-mode #phishing-url::placeholder {
+            color: #aaa;
+        }
+
+        #check-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            align-self: center;
+            min-width: 160px;
+            transition: background 0.3s;
+        }
+
+        #check-button:hover {
+            background: #3a5bd9;
+        }
+
+        @media (max-width: 560px) {
+            #phishing-url { width: 92%; }
+            #check-button { width: 92%; }
+        }
+
+        .result-section {
+            margin-top: 30px;
+            display: none; /* hidden before search */
+            color: #333;
+        }
+
+        body.dark-mode .result-section {
+            color: var(--dark-text);
+        }
+
+        .score-display {
+            text-align: center;
+            font-size: 56px;
+            font-weight: 800;
+            color: var(--primary-color);
+            letter-spacing: -1px;
+            min-height: 68px; /* avoid layout shift during count animation */
+            transition: transform 0.25s ease;
+        }
+
+        .score-display.animate-pop {
+            transform: scale(1.06);
+        }
+
+        .risk-bar {
+            height: 18px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin: 18px 0;
+            overflow: hidden;
+        }
+
+        body.dark-mode .risk-bar {
+            background: #444;
+        }
+
+        .risk-fill {
+            height: 100%;
+            width: 0%;
+            transition: width 900ms cubic-bezier(.2,.9,.2,1); /* smooth fill */
+            border-radius: 10px;
+        }
+
+        .risk-status {
+            text-align: center;
+            font-size: 17px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 6px;
+        }
+
+        .safe {
+            background: #c8e6c9;
+            color: #1b5e20;
+        }
+
+        body.dark-mode .safe {
+            background: #2d3d2e;
+            color: #a5d6a7;
+        }
+
+        .suspicious {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+
+        body.dark-mode .suspicious {
+            background: #3d3c2e;
+            color: #ffcc80;
+        }
+
+        .danger {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+
+        body.dark-mode .danger {
+            background: #3d2d2e;
+            color: #ef9a9a;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-top: 18px;
+            display: none;
+        }
+
+        body.dark-mode .loading {
+            color: #aaa;
+        }
+
+        /* New advice box styling */
+        .advice-box {
+            margin-top: 14px;
+            padding: 14px;
+            border-radius: 8px;
+            font-size: 14px;
+            line-height: 1.5;
+            display: none;
+            color: #333;
+        }
+
+        body.dark-mode .advice-box {
+            color: var(--dark-text);
+        }
+
+        .advice-box.safe {
+            background: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #c8e6c9;
+        }
+
+        body.dark-mode .advice-box.safe {
+            background: #2d3d2e;
+            color: #a5d6a7;
+            border-color: #1b5e20;
+        }
+
+        .advice-box.suspicious {
+            background: #fffde7;
+            color: #795548;
+            border: 1px solid #fff9c4;
+        }
+
+        body.dark-mode .advice-box.suspicious {
+            background: #3d3c2e;
+            color: #ffcc80;
+            border-color: #f57f17;
+        }
+
+        .advice-box.danger {
+            background: #ffebee;
+            color: #b71c1c;
+            border: 1px solid #ffcdd2;
+        }
+
+        body.dark-mode .advice-box.danger {
+            background: #3d2d2e;
+            color: #ef9a9a;
+            border-color: #c62828;
+        }
+
+        .advice-box ul {
+            margin: 8px 0 0 18px;
+            padding: 0;
+            color: inherit;
+        }
+
+        .advice-box li {
+            color: inherit;
+        }
+
+        .advice-title {
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: inherit;
+        }
+
+        /* Inline warning (for empty URL) */
+        .inline-warning {
+            display: none;
+            margin-top: 8px;
+            font-size: 13px;
+            color: var(--danger-color);
+        }
+        body.dark-mode .inline-warning { color: #ff9b9b; }
+
+        /* small shake animation for input when empty */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-6px); }
+            40% { transform: translateX(6px); }
+            60% { transform: translateX(-4px); }
+            80% { transform: translateX(4px); }
+            100% { transform: translateX(0); }
+        }
+        .shake {
+            animation: shake 420ms ease;
+        }
+
+        @media (min-width: 768px) {
+            .logo {
+                height: 35px;
+            }
+
+            .app-title {
+                font-size: 18px;
+            }
+
+            .balance {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+
+            .icon-btn {
+                font-size: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-title { font-size: 14px; }
+            .logo { height: 40px; }
+            .header-controls { gap: 10px; }
+            .balance { font-size: 11px; padding: 4px 8px; }
+            .icon-btn { font-size: 16px; }
+            .notification-badge { width: 16px; height: 16px; font-size: 9px; }
+            .container { margin: 20px auto; }
+            .header h1 { font-size: 20px; }
+        }
+    </style>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+    />
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo-container">
+            <a href="index.html">
+                <img src="" alt="App Logo" class="logo" id="header-logo">
+            </a>
+        </div>
+
+        <div class="header-controls">
+            <div class="balance-container">
+                <span class="balance"><span id="user-balance">0.00</span>৳</span>
+            </div>
+            <button class="icon-btn theme-toggle" id="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="icon-btn" id="orders-btn" onclick="window.location.href='orders.html'">
+                <i class="fas fa-clipboard-list"></i>
+            </button>
+            <button class="icon-btn" id="notification-btn" onclick="window.location.href='notifications.html'">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notification-badge">0</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="header">
+            <h1> ফিশিং লিংক এ ক্লিক করছেন না তো? <br><span>ফিশিং লিংক চেক করুন</span></h1>
+        </div>
+
+        <div class="checker-box">
+            <div class="input-group">
+                <input type="text" id="phishing-url" placeholder="https://example.com" aria-label="URL লিখুন">
+                <button id="check-button">চেক করুন</button>
+                <div class="inline-warning" id="inline-warning" role="alert" aria-live="assertive"></div>
+            </div>
+
+            <div class="loading" id="loading">চেক করা হচ্ছে...</div>
+
+            <div class="result-section" id="result-section" aria-live="polite">
+                <div class="score-display" id="score"></div>
+                <div class="risk-bar" aria-hidden="false">
+                    <div class="risk-fill" id="risk-fill"></div>
+                </div>
+                <div class="risk-status" id="risk-status">সর্বদা সতর্ক থাকুন</div>
+
+                <!-- নতুন: সাবধান/সতর্কতা বক্স -->
+                <div class="advice-box" id="advice-box" role="region" aria-live="polite"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="payment.html" class="nav-btn" id="deposit-btn">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Deposit</span>
+        </a>
+        <a href="index.html" class="nav-btn" id="home-btn">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="profile.html" class="nav-btn" id="profile-btn">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
+    </nav>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCEn86IfdTNcvEmQuNP-KCvrmMABagcdkc",
+            authDomain: "web-iatz.firebaseapp.com",
+            projectId: "web-iatz",
+            storageBucket: "web-iatz.appspot.com",
+            messagingSenderId: "264921056318",
+            appId: "1:264921056318:web:c77e93fad660665bdfbd6f",
+            databaseURL: "https://web-iatz-default-rtdb.asia-southeast1.firebasedatabase.app"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const firestore = firebase.firestore();
+        const database = firebase.database();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const headerLogo = document.getElementById("header-logo");
+            const themeToggle = document.getElementById('theme-toggle');
+            const body = document.body;
+            const navBtns = document.querySelectorAll(".nav-btn");
+            const urlInput = document.getElementById('phishing-url');
+            const checkButton = document.getElementById('check-button');
+            const loading = document.getElementById('loading');
+            const resultSection = document.getElementById('result-section');
+            const scoreDisplay = document.getElementById('score');
+            const riskFill = document.getElementById('risk-fill');
+            const riskStatus = document.getElementById('risk-status');
+            const adviceBox = document.getElementById('advice-box');
+            const inlineWarning = document.getElementById('inline-warning');
+            const userBalance = document.getElementById('user-balance');
+            const notificationBadge = document.getElementById('notification-badge');
+
+            let currentUser = null;
+
+            // Update header with app branding
+            function updateHeader() {
+                headerLogo.src = "https://blogger.googleusercontent.com/img/a/AVvXsEgW5dZpZAJIK5YbbeKlgkJV_igyvLVrYOjf8x9hRNXgJ6HkrhJ97QcDHnA96ufPb-GSfSlMYxScq5_EEzEa6Og2bkuocwzIDGWC-U1KfWczpfLGHyUuyBfr-y3FxCROBpfBRxFg2P0ko7atcJkS-zeAA3h-Dymv982OAitr5CYWlGCjx4gXpX2vzLr7";
+                headerLogo.style.display = "block";
+            }
+
+            // Theme Toggle
+            const savedTheme = localStorage.getItem("theme");
+            if (savedTheme === "dark") {
+                body.classList.add("dark-mode");
+            }
+
+            themeToggle.addEventListener("click", () => {
+                body.classList.toggle("dark-mode");
+                const isDark = body.classList.contains("dark-mode");
+                localStorage.setItem("theme", isDark ? "dark" : "light");
+            });
+
+            // Navigation Active State
+            const currentPage = window.location.pathname.split("/").pop() || "index.html";
+            navBtns.forEach(btn => {
+                const btnPage = btn.getAttribute("href").split("/").pop();
+                if (btnPage === currentPage) {
+                    btn.classList.add("active");
+                }
+                
+                // Add authentication check for navigation
+                btn.addEventListener("click", (e) => {
+                    if (!currentUser) {
+                        e.preventDefault();
+                        setTimeout(() => {
+                            window.location.href = "signin.html";
+                        }, 100);
+                    }
+                });
+            });
+
+            // High & medium risk patterns
+            const highRiskPatterns = [
+                /facebook\.com\./,
+                /gmail\.com\./,
+                /paypal\.com\./,
+                /amazon\.com\./,
+                /microsoft\.com\./,
+                /apple\.com\./,
+                /netflix\.com\./,
+                /login[\w.-]*\.com/,
+                /verify[\w.-]*\.com/,
+                /secure[\w.-]*\.com/,
+                /update[\w.-]*\.com/
+            ];
+
+            const mediumRiskPatterns = [
+                /bit\.ly/,
+                /tinyurl\.com/,
+                /goo\.gl/,
+                /t\.co/,
+                /[\w.-]{50,}/,
+                /[@#\$%\^&\*\(\)\{\}\[\]\|\\]/
+            ];
+
+            checkButton.addEventListener('click', runCheck);
+            urlInput.addEventListener('keypress', function(e){
+                if (e.key === 'Enter') { e.preventDefault(); runCheck(); }
+            });
+
+            function runCheck() {
+                const url = urlInput.value.trim();
+
+                // reset previous view
+                resultSection.style.display = 'none';
+                scoreDisplay.textContent = '';
+                riskFill.style.width = '0%';
+                riskFill.style.background = '';
+                riskStatus.textContent = 'সর্বদা সতর্ক থাকুন';
+                riskStatus.className = 'risk-status';
+                adviceBox.style.display = 'none';
+                adviceBox.className = 'advice-box';
+                adviceBox.innerHTML = '';
+                inlineWarning.style.display = 'none';
+                inlineWarning.textContent = '';
+
+                if (!url) {
+                    // If URL is empty: do NOT show percent or advice.
+                    // Show a small inline warning and a subtle shake on the input.
+                    inlineWarning.textContent = 'অনুগ্রহ করে URL লিখুন।';
+                    inlineWarning.style.display = 'block';
+
+                    // shake effect
+                    urlInput.classList.remove('shake');
+                    // reflow to restart animation
+                    void urlInput.offsetWidth;
+                    urlInput.classList.add('shake');
+
+                    // ensure loading/result hidden
+                    loading.style.display = 'none';
+                    resultSection.style.display = 'none';
+
+                    // remove shake after animation ends
+                    setTimeout(() => {
+                        urlInput.classList.remove('shake');
+                    }, 500);
+
+                    return;
+                }
+
+                // valid non-empty: proceed with normal check
+                inlineWarning.style.display = 'none';
+                loading.textContent = 'চেক করা হচ্ছে...';
+                loading.style.display = 'block';
+
+                // simulated check delay
+                setTimeout(() => {
+                    const result = analyzeUrl(url);
+                    loading.style.display = 'none';
+                    showResult(result.message, result.score);
+                }, 700);
+            }
+
+            function analyzeUrl(url) {
+                let score = 0;
+                let urlObj;
+                try {
+                    urlObj = new URL(url.includes('://') ? url : 'https://' + url);
+                } catch {
+                    return { score: 0, message: 'URL ফরমেট ঠিক নয়' };
+                }
+
+                const hostname = urlObj.hostname.toLowerCase();
+                const full = urlObj.href.toLowerCase();
+
+                highRiskPatterns.forEach(pattern => { if (pattern.test(full)) score += 25; });
+                mediumRiskPatterns.forEach(pattern => { if (pattern.test(full)) score += 15; });
+
+                if (/^(\d{1,3}\.){3}\d{1,3}$/.test(hostname)) score += 20;
+                if (hostname.split('.').length - 2 > 3) score += 15;
+                if (full.length > 100) score += 10;
+                if (full.startsWith('https://')) score -= 10;
+
+                score = Math.round(Math.max(0, Math.min(100, score)));
+
+                let message;
+                if (score <= 10) message = 'নিরাপদ';
+                else if (score <= 60) message = 'সন্দেহজনক';
+                else message = 'ফিশিং সম্ভব';
+
+                return { score, message };
+            }
+
+            // Smooth numeric animation for score
+            function animateNumber(from, to, duration, onUpdate, onComplete) {
+                const start = performance.now();
+                const step = (now) => {
+                    const elapsed = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    // easeOutCubic
+                    const eased = 1 - Math.pow(1 - progress, 3);
+                    const current = Math.round(from + (to - from) * eased);
+                    onUpdate(current);
+                    if (progress < 1) requestAnimationFrame(step);
+                    else onComplete && onComplete();
+                };
+                requestAnimationFrame(step);
+            }
+
+            function showResult(message, score) {
+                resultSection.style.display = 'block';
+
+                // animate fill and number
+                const duration = Math.max(600, Math.min(1200, 6 * score));
+
+                // Animate numeric score from 0 to target
+                animateNumber(0, score, duration, (val) => {
+                    scoreDisplay.textContent = val + '%';
+                    if (val === score) {
+                        scoreDisplay.classList.add('animate-pop');
+                        setTimeout(() => scoreDisplay.classList.remove('animate-pop'), 220);
+                    }
+                });
+
+                // set background color according to risk
+                if (score <= 10) {
+                    riskFill.style.background = '#4caf50';
+                    riskStatus.className = 'risk-status safe';
+                } else if (score <= 60) {
+                    riskFill.style.background = '#ff9800';
+                    riskStatus.className = 'risk-status suspicious';
+                } else {
+                    riskFill.style.background = '#f44336';
+                    riskStatus.className = 'risk-status danger';
+                }
+
+                // trigger CSS width transition
+                setTimeout(() => {
+                    riskFill.style.width = score + '%';
+                }, 20);
+
+                // set status text
+                riskStatus.textContent = message;
+
+                // advice text based on result
+                let adviceHtml = '';
+                if (message === 'নিরাপদ') {
+                    adviceHtml = `<div class="advice-title">স্তর: নিরাপদ</div>` +
+                        `<div>এই লিংকটি সাধারণত নিরাপদ দেখাচ্ছে। তবুও নিম্নলিখিত বিষয়গুলো মেনে চলুন:</div>` +
+                        `<ul><li>অচেনা অনুরোধ থেকে ব্যক্তিগত তথ্য দিবেন না।</li><li> লিংক খুললে অ্যাড্রেস বার দেখে নিশ্চিত করুন।</li><li>সন্দেহ হলে সরাসরি অফিসিয়াল সাইটে যান।</li></ul>`;
+                    adviceBox.classList.add('safe');
+                } else if (message === 'সন্দেহজনক') {
+                    adviceHtml = `<div class="advice-title">স্তর: সন্দেহজনক</div>` +
+                        `<div>এই লিংকটি সন্দেহযোগ্য — সতর্ক থাকুন এবং নিচের কাজগুলো করুন:</div>` +
+                        `<ul><li>কোনো লগইন/পেমেন্ট তথ্য দেবেন না।</li><li>ডোমেইন নাম/ট্রান্সপিারেন্স দেখে নিন (পূর্ণ URL চেক করুন)।</li><li>স্ট্যান্ডার্ড URL পরীক্ষা করতে URL expander বা ব্রাউজার প্লাগইন ব্যবহার করুন।</li></ul>`;
+                    adviceBox.classList.add('suspicious');
+                } else { // 'ফিশিং সম্ভব'
+                    adviceHtml = `<div class="advice-title">সতর্কতা: ফিশিং সম্ভাব্য</div>` +
+                        `<div>এই লিংকটি উচ্চ ঝুঁকিপূর্ণ মনে হচ্ছে — নিচের কাজগুলো অবিলম্বে করুন:</div>` +
+                        `<ul><li>লিংকটি ক্লিক বা ফর্মে কোনো তথ্য দেবেন না।</li><li>আপনার পাসওয়ার্ড বা পেমেন্ট তথ্য প্রবেশ করাননি কিনা তা চেক করুন।</li><li>লিংকটি সংশ্লিষ্ট সার্ভিসে রিপোর্ট করুন (যেমন Gmail, Facebook, ইত্যাদি)।</li><li>অন্যান্য ডিভাইসে একই লগইন ব্যাবহার করলে পাসওয়ার্ড বদলে ফেলুন ও 2FA চালু করুন।</li></ul>`;
+                    adviceBox.classList.add('danger');
+                }
+
+                if (adviceHtml) {
+                    adviceBox.innerHTML = adviceHtml;
+                    adviceBox.style.display = 'block';
+                } else {
+                    adviceBox.style.display = 'none';
+                }
+
+                // for accessibility focus
+                riskStatus.setAttribute('tabindex', '-1');
+                riskStatus.focus();
+            }
+
+            // Update balance with animation
+            function updateBalanceDisplay(balance) {
+                const formattedBalance = parseFloat(balance).toFixed(2);
+                userBalance.textContent = formattedBalance;
+                
+                // Add animation
+                userBalance.parentElement.classList.add("update");
+                setTimeout(() => {
+                    userBalance.parentElement.classList.remove("update");
+                }, 300);
+            }
+
+            // Update notification badge
+            function updateNotificationBadge(count) {
+                const num = parseInt(count) || 0;
+                
+                if (num > 0) {
+                    notificationBadge.textContent = num;
+                    notificationBadge.style.display = "flex";
+                    
+                    if (num > parseInt(notificationBadge.dataset.prevCount || 0)) {
+                        notificationBadge.classList.add("pulse");
+                        setTimeout(() => {
+                            notificationBadge.classList.remove("pulse");
+                        }, 1000);
+                    }
+                } else {
+                    notificationBadge.style.display = "none";
+                }
+                
+                notificationBadge.dataset.prevCount = num;
+            }
+
+            // Check user authentication state
+            function checkAuthState() {
+                auth.onAuthStateChanged(async (user) => {
+                    currentUser = user;
+                    if (user) {
+                        // User is signed in
+                        await loadUserData(user.uid);
+                        setupNotificationListener(user.uid);
+                    } else {
+                        // No user is signed in - redirect to login
+                        setTimeout(() => {
+                            window.location.href = "signin.html";
+                        }, 100);
+                    }
+                });
+            }
+
+            // Load user data from Firestore with real-time updates
+            async function loadUserData(userId) {
+                try {
+                    const userRef = firestore.collection("users").doc(userId);
+                    
+                    // Set up real-time listener for balance updates
+                    userRef.onSnapshot((doc) => {
+                        if (doc.exists) {
+                            const userData = doc.data();
+                            if (userData.balance !== undefined) {
+                                updateBalanceDisplay(userData.balance);
+                            }
+                        }
+                    }, (error) => {
+                        console.error("Error loading user data:", error);
+                    });
+                    
+                } catch (error) {
+                    console.error("Error setting up user data listener:", error);
+                }
+            }
+
+            // Setup real-time notification listener
+            function setupNotificationListener(userId) {
+                try {
+                    const notificationsRef = firestore.collection("notifications")
+                        .where("userId", "==", userId)
+                        .where("read", "==", false);
+                        
+                    notificationsRef.onSnapshot((snapshot) => {
+                        const unreadNotifications = snapshot.size;
+                        updateNotificationBadge(unreadNotifications);
+                    }, (error) => {
+                        console.error("Notification listener error:", error);
+                    });
+                } catch (error) {
+                    console.error("Error setting up notification listener:", error);
+                }
+            }
+
+            // Initialize the app
+            function init() {
+                updateHeader();
+                checkAuthState();
+            }
+
+            // Initial values and setup
+            init();
+        });
+    </script>
+</body>
+</html>

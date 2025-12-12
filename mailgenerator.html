@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Mail Generator - Temporary Email</title>
+
+  <!-- Optional fonts (won't break if blocked) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+  <style>
+    /* ---------- RESET & BASE ---------- */
+    * { 
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    html,body { 
+      height:100%; 
+      width: 100%;
+      margin:0; 
+      padding:0; 
+      overflow-x: hidden;
+    }
+    
+    body {
+      background-color: #f5f7ff;
+      color: #333;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      transition: background-color 0.3s, color 0.3s;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      width: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #f0f0f0;
+    }
+
+    /* ---------- HEADER STYLES ---------- */
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      background-color: #fff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      border-bottom-left-radius: 30px;
+      border-bottom-right-radius: 30px;
+      height: 50px;
+      width: 100%;
+    }
+    
+    body.dark-mode header {
+      background-color: #2d2d2d;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      max-width: 50%;
+      overflow: hidden;
+    }
+    
+    .logo {
+      height: 40px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+    }
+    
+    .app-title {
+      font-weight: 700;
+      font-size: 16px;
+      color: #4a6bff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+    
+    .balance-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .balance {
+      background-color: #4a6bff;
+      color: #fff;
+      padding: 5px 10px;
+      border-radius: 20px;
+      font-weight: 600;
+      font-size: 12px;
+      white-space: nowrap;
+      display: flex;
+      flex-direction: row-reverse;
+      gap: 5px;
+      transition: transform 0.3s;
+    }
+    
+    .balance.update {
+      transform: scale(1.1);
+    }
+    
+    .icon-btn {
+      background: none;
+      border: none;
+      color: #333;
+      font-size: 18px;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s;
+      padding: 5px;
+      width: 15px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    body.dark-mode .icon-btn {
+      color: #f0f0f0;
+    }
+    
+    .notification-badge {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      background-color: #ff6b6b;
+      color: white;
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      transition: all 0.3s;
+    }
+    
+    .notification-badge.pulse {
+      animation: pulse 0.5s 2;
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.3); }
+      100% { transform: scale(1); }
+    }
+    
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .theme-toggle .fa-sun,
+    .theme-toggle .fa-moon {
+      transition: opacity 0.3s;
+    }
+    
+    body.dark-mode .theme-toggle .fa-sun {
+      display: block;
+      opacity: 1;
+    }
+    
+    body.dark-mode .theme-toggle .fa-moon {
+      display: none;
+      opacity: 0;
+    }
+    
+    body:not(.dark-mode) .theme-toggle .fa-sun {
+      display: none;
+      opacity: 0;
+    }
+    
+    body:not(.dark-mode) .theme-toggle .fa-moon {
+      display: block;
+      opacity: 1;
+    }
+
+    /* ---------- NAVIGATION BAR STYLES ---------- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #fff;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+      transition: background-color 0.3s, box-shadow 0.3s;
+      border-top-left-radius: 30px;
+      border-top-right-radius: 30px;
+      height: 60px;
+      width: 100%;
+    }
+    
+    body.dark-mode .bottom-nav {
+      background-color: #2d2d2d;
+      box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .nav-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      color: #333;
+      font-size: 12px;
+      transition: all 0.3s;
+      padding: 8px 12px;
+      position: relative;
+      flex: 1;
+      max-width: 33.33%;
+    }
+    
+    body.dark-mode .nav-btn {
+      color: #f0f0f0;
+    }
+    
+    .nav-btn i {
+      font-size: 20px;
+      margin-bottom: 4px;
+      transition: color 0.3s;
+    }
+    
+    .nav-btn:hover i {
+      color: #4a6bff;
+    }
+    
+    .nav-btn.active i {
+      color: #4a6bff;
+    }
+    
+    .nav-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -8px;
+      width: 6px;
+      height: 6px;
+      background-color: #4a6bff;
+      border-radius: 50%;
+    }
+
+    /* ---------- WRAPPER ---------- */
+    .wrap {
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 60px 0 70px 0;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    /* ---------- CONTENT CONTAINER ---------- */
+    .content-container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 0 18px;
+      width: 100%;
+    }
+
+    /* ---------- TITLE ---------- */
+    .page-title {
+      text-align:center;
+      margin: 8px 0 18px;
+      font-size: clamp(20px, 4vw, 36px);
+      font-weight:700;
+      letter-spacing:-0.6px;
+      font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      width: 100%;
+    }
+
+    /* ---------- BOXES ---------- */
+    .box {
+      background: #fff;
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: 0 8px 28px rgba(2,6,23,0.06);
+      margin-bottom: 14px;
+      width: 100%;
+    }
+    
+    body.dark-mode .box {
+      background-color: #2d2d2d;
+      color: #f0f0f0;
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+    }
+    
+    .muted { 
+      color: #6b7280; 
+      font-size:14px; 
+      margin-bottom:20px; 
+    }
+
+    /* ---------- EMAIL ADDRESS ---------- */
+    .email-row {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      width: 100%;
+    }
+    
+    .email-address {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", "Courier New", monospace;
+      font-size: clamp(16px, 3.2vw, 20px);
+      font-weight:700;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      flex: 1;
+    }
+
+    /* ---------- BUTTONS ---------- */
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:10px;
+      border:0; 
+      padding:10px 12px; 
+      border-radius:12px;
+      cursor:pointer; 
+      font-weight:600; 
+      font-size:14px;
+      transition: transform .14s ease, box-shadow .14s ease, opacity .12s ease;
+      font-family: "Space Grotesk", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      width: 100%;
+    }
+    
+    .btn:active { transform: translateY(1px); }
+    .btn:disabled { opacity:0.6; cursor:not-allowed; }
+
+    .btn-primary { 
+      background: linear-gradient(90deg,#6366f1,#7c3aed); 
+      color:white; 
+      box-shadow: 0 8px 18px rgba(99,102,241,0.18); 
+    }
+    
+    .btn-danger  { 
+      background: linear-gradient(90deg,#ef4444,#dc2626); 
+      color:white; 
+      box-shadow: 0 8px 18px rgba(239,68,68,0.14); 
+    }
+    
+    .btn-ghost   { 
+      background: #f3f4f6; 
+      color: #0f172a; 
+      border:1px solid #e6e9ef; 
+    }
+
+    .icon-btn-app { 
+      width:40px; 
+      height:40px; 
+      padding:0; 
+      justify-content:center; 
+      border-radius:10px; 
+    }
+
+    /* Material symbol helper */
+    .material { 
+      font-family: "Material Symbols Outlined"; 
+      font-size:18px; 
+      line-height:1; 
+    }
+
+    /* ---------- INBOX HEADER ---------- */
+    .inbox-head {
+      display:flex; 
+      align-items:center; 
+      justify-content:space-between; 
+      gap:12px;
+      margin:8px 0;
+      width: 100%;
+    }
+    
+    .timer {
+      display:flex; 
+      align-items:center; 
+      gap:8px; 
+      background:#fff; 
+      padding:8px 10px; 
+      border-radius:10px;
+      border:1px solid #eceff5; 
+      box-shadow:0 6px 14px rgba(2,6,23,0.03); 
+      font-weight:700;
+    }
+    
+    body.dark-mode .timer {
+      background: #2d2d2d;
+      color: #f0f0f0;
+      border-color: #444;
+    }
+
+    /* ---------- INBOX / EMPTY ---------- */
+    .inbox-list { 
+      margin-top:12px; 
+      display:block; 
+      gap:10px; 
+      width: 100%;
+    }
+    
+    .empty {
+      text-align:center;
+      padding:28px;
+      color:#6b7280;
+      width: 100%;
+    }
+
+    /* Empty inbox icon animation */
+    .empty-icon {
+      font-size:44px;
+      line-height:1;
+      margin-bottom:8px;
+      display: inline-block;
+      animation: rotate 2s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* individual message */
+    .msg {
+      display:block; 
+      padding:12px; 
+      border-radius:12px;
+      background:#fff; 
+      box-shadow:0 6px 18px rgba(2,6,23,0.04);
+      cursor:pointer; 
+      transition: background .12s ease, transform .08s ease;
+      width: 100%;
+    }
+    
+    body.dark-mode .msg {
+      background: #2d2d2d;
+      color: #f0f0f0;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+    }
+    
+    .msg:hover { 
+      background:#f8fafc; 
+      transform: translateY(-2px); 
+    }
+    
+    body.dark-mode .msg:hover {
+      background: #3a3a3a;
+    }
+    
+    .msg .title { 
+      font-weight:700; 
+      margin-bottom:6px; 
+      overflow:hidden; 
+      text-overflow:ellipsis; 
+      white-space:nowrap; 
+    }
+    
+    .msg .meta { 
+      display:flex; 
+      justify-content:space-between; 
+      gap:8px; 
+      color:#6b7280; 
+      font-size:13px; 
+    }
+
+    /* ---------- EMAIL VIEW ---------- */
+    #email-screen { display:none; }
+    
+    .email-meta { 
+      display:flex; 
+      gap:12px; 
+      align-items:center; 
+      margin-top:8px; 
+    }
+    
+    .avatar { 
+      width:48px; 
+      height:48px; 
+      border-radius:50%; 
+      display:flex; 
+      align-items:center; 
+      justify-content:center; 
+      color:white; 
+      background:#6366f1; 
+      font-weight:700; 
+      font-size:18px; 
+    }
+
+    iframe#email-body { 
+      width:100%; 
+      height:420px; 
+      border:0; 
+      border-radius:10px; 
+      background:#fff !important; 
+      color: #000 !important;
+    }
+    
+    body.dark-mode iframe#email-body {
+      background: #fff !important;
+      filter: invert(1) hue-rotate(180deg);
+    }
+
+    /* ---------- BUTTONS CONTAINER ---------- */
+    .buttons-container {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+    
+    .buttons-container .btn {
+      width: calc(50% - 12.5px);
+      min-width: 120px;
+      max-width: 200px;
+    }
+
+    /* ---------- SPINNER ---------- */
+    @keyframes spin { 
+      to { 
+        transform: rotate(360deg); 
+      } 
+    }
+    
+    .spinner {
+      display:inline-block; 
+      width:18px; 
+      height:18px; 
+      border:2px solid rgba(255,255,255,0.32); 
+      border-radius:50%; 
+      border-top-color:white; 
+      animation:spin 1s linear infinite;
+    }
+
+    /* ---------- RESPONSIVE ---------- */
+    @media (max-width:640px) {
+      .wrap { 
+        padding: 50px 0 60px 0;
+      }
+      
+      .content-container {
+        padding: 0 12px;
+      }
+      
+      iframe#email-body { 
+        height:320px; 
+      }
+      
+      .app-title {
+        font-size: 14px;
+      }
+      
+      .logo {
+        height: 40px;
+      }
+      
+      .header-controls {
+        gap: 10px;
+      }
+      
+      .balance {
+        font-size: 11px;
+        padding: 4px 8px;
+      }
+      
+      .icon-btn {
+        font-size: 16px;
+      }
+      
+      .notification-badge {
+        width: 16px;
+        height: 16px;
+        font-size: 9px;
+      }
+      
+      .buttons-container {
+        gap: 15px;
+      }
+      
+      .buttons-container .btn {
+        width: calc(50% - 7.5px);
+      }
+      
+      .box {
+        padding: 30px;
+      }
+    }
+    
+    @media (min-width: 768px) {
+      .logo {
+        height: 35px;
+      }
+      
+      .app-title {
+        font-size: 18px;
+      }
+      
+      .balance {
+        font-size: 14px;
+        padding: 6px 12px;
+      }
+      
+      .icon-btn {
+        font-size: 20px;
+      }
+    }
+  </style>
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <div class="logo-container">
+      <a href="index.html">
+        <img src="" alt="App Logo" class="logo" id="header-logo">
+      </a>
+    </div>
+    
+    <div class="header-controls">
+      <div class="balance-container">
+        <span class="balance"><span id="user-balance">0.00</span>৳</span>
+      </div>
+      <button class="icon-btn theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun"></i>
+        <i class="fas fa-moon"></i>
+      </button>
+      <button class="icon-btn" id="orders-btn" onclick="window.location.href='orders.html'">
+        <i class="fas fa-clipboard-list"></i>
+      </button>
+      <button class="icon-btn" id="notification-btn" onclick="window.location.href='notifications.html'">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge" id="notification-badge">0</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <!-- Content Container for centering on larger screens -->
+    <div class="content-container">
+      <!-- Centered Title -->
+      <div class="page-title">Mail Generator</div>
+
+      <!-- MAIN APP -->
+      <div id="home">
+
+        <!-- Email address box -->
+        <div class="box">
+          <div class="muted">Your temporary email address</div>
+
+          <div class="email-row">
+            <div style="flex:1;">
+              <div id="email-address" class="email-address">loading...</div>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-left:12px; align-items:center;">
+              <button id="copy-btn" class="btn icon-btn-app btn-ghost" title="Copy email">
+                <span class="material">content_copy</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Centered Change and Delete buttons with 25px gap -->
+          <div class="buttons-container">
+            <button id="change-mail-btn" class="btn btn-primary">
+              <span class="material">change_circle</span> <span>Change</span>
+            </button>
+            <button id="delete-mail-btn" class="btn btn-danger">
+              <span class="material">delete</span> <span>Delete</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Inbox -->
+        <div>
+          <div class="inbox-head">
+            <h2 style="margin:0; font-size:20px; font-family: 'Space Grotesk', system-ui;">Inbox</h2>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+              <div class="timer">
+                <span class="material">timer</span>
+                <span id="timer-display">10:00</span>
+              </div>
+
+              <button id="extend-timer-btn" class="btn btn-ghost">Extend</button>
+              <button id="refresh-btn" class="btn icon-btn-app btn-ghost" title="Refresh">
+                <span class="material">refresh</span>
+              </button>
+            </div>
+          </div>
+
+          <div id="empty-inbox" class="box empty">
+            <div class="empty-icon">⧗</div>
+            <div>Your inbox is empty</div>
+            <div>Waiting for incoming emails...</div>
+          </div>
+
+          <div id="inbox-list" class="inbox-list"></div>
+        </div>
+
+      </div>
+
+      <!-- EMAIL VIEW (hidden by default) -->
+      <div id="email-screen" class="box" style="display:none;">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+          <button id="back-to-inbox-btn" class="btn btn-ghost icon-btn-app" title="Back">
+            <span class="material">arrow_back</span>
+          </button>
+          <h3 id="email-subject-header" style="margin:0; font-size:18px; font-family: 'Space Grotesk', system-ui;">Email Details</h3>
+        </div>
+
+        <div class="email-meta">
+          <div id="email-avatar" class="avatar">E</div>
+          <div>
+            <div id="email-from" style="font-weight:700;">From</div>
+            <div id="email-timestamp" class="muted" style="margin-top:6px;">time</div>
+            <div style="margin-top:6px; color:#6b7280; font-size:13px;">to: <span id="email-to"></span></div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <iframe id="email-body" sandbox="allow-same-origin"></iframe>
+        </div>
+
+        <div style="margin-top:12px;">
+          <button id="delete-message-btn" class="btn btn-danger">
+            <span class="material">delete</span> <span>Delete Message (Local)</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <a href="payment.html" class="nav-btn" id="deposit-btn">
+      <i class="fas fa-money-bill-wave"></i>
+      <span>Deposit</span>
+    </a>
+    <a href="index.html" class="nav-btn" id="home-btn">
+      <i class="fas fa-home"></i>
+      <span>Home</span>
+    </a>
+    <a href="profile.html" class="nav-btn" id="profile-btn">
+      <i class="fas fa-user"></i>
+      <span>Profile</span>
+    </a>
+  </nav>
+
+  <!-- SCRIPT: API + UI LOGIC -->
+  <script type="module">
+    // Firebase Configuration (same as previous code)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCEn86IfdTNcvEmQuNP-KCvrmMABagcdkc",
+      authDomain: "web-iatz.firebaseapp.com",
+      projectId: "web-iatz",
+      storageBucket: "web-iatz.appspot.com",
+      messagingSenderId: "264921056318",
+      appId: "1:264921056318:web:c77e93fad660665bdfbd6f"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const firestore = firebase.firestore();
+
+    const API_BASE = 'https://api.mail.tm';
+    let currentAccount = { id:null, address:null, password:null, token:null };
+    let inboxInterval = null;
+    let timerInterval = null;
+    let timerSeconds = 600;
+    let hasEmailGenerated = false;
+    let currentUser = null;
+
+    // DOM elements
+    const emailAddressEl = document.getElementById('email-address');
+    const copyBtn = document.getElementById('copy-btn');
+    const changeBtn = document.getElementById('change-mail-btn');
+    const deleteBtn = document.getElementById('delete-mail-btn');
+    const refreshBtn = document.getElementById('refresh-btn');
+    const extendBtn = document.getElementById('extend-timer-btn');
+    const timerDisplay = document.getElementById('timer-display');
+    const inboxList = document.getElementById('inbox-list');
+    const emptyInbox = document.getElementById('empty-inbox');
+    const homeScreen = document.getElementById('home');
+    const emailScreen = document.getElementById('email-screen');
+    const backBtn = document.getElementById('back-to-inbox-btn');
+    const emailSubjectHeader = document.getElementById('email-subject-header');
+    const emailAvatar = document.getElementById('email-avatar');
+    const emailFrom = document.getElementById('email-from');
+    const emailTo = document.getElementById('email-to');
+    const emailTimestamp = document.getElementById('email-timestamp');
+    const emailBody = document.getElementById('email-body');
+    const deleteMessageBtn = document.getElementById('delete-message-btn');
+    
+    // Header elements
+    const userBalance = document.getElementById('user-balance');
+    const themeToggle = document.getElementById('theme-toggle');
+    const body = document.body;
+    const notificationBadge = document.getElementById('notification-badge');
+    const headerLogo = document.getElementById('header-logo');
+    const navBtns = document.querySelectorAll('.nav-btn');
+
+    // Update balance display with animation
+    function updateBalanceDisplay(balance) {
+      const formattedBalance = parseFloat(balance).toFixed(2);
+      userBalance.textContent = formattedBalance;
+      
+      // Add animation
+      userBalance.parentElement.classList.add("update");
+      setTimeout(() => {
+        userBalance.parentElement.classList.remove("update");
+      }, 300);
+    }
+
+    // Load user data from Firestore
+    function loadUserData(userId) {
+      const userRef = firestore.collection("users").doc(userId);
+      
+      userRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          const userData = doc.data();
+          if (userData.balance !== undefined) {
+            updateBalanceDisplay(userData.balance);
+          }
+        }
+      }, (error) => {
+        console.error("Error loading user data:", error);
+      });
+    }
+
+    // Setup real-time notification listener
+    function setupNotificationListener(userId) {
+      const notificationsRef = firestore.collection("notifications")
+        .where("userId", "==", userId)
+        .where("read", "==", false);
+        
+      notificationsRef.onSnapshot((snapshot) => {
+        const unreadNotifications = snapshot.size;
+        updateNotificationBadge(unreadNotifications);
+      }, (error) => {
+        console.error("Notification listener error:", error);
+      });
+    }
+
+    // Update notification badge
+    function updateNotificationBadge(count) {
+      const num = parseInt(count) || 0;
+      
+      if (num > 0) {
+        notificationBadge.textContent = num;
+        notificationBadge.style.display = "flex";
+        
+        if (num > parseInt(notificationBadge.dataset.prevCount || 0)) {
+          notificationBadge.classList.add("pulse");
+          setTimeout(() => {
+            notificationBadge.classList.remove("pulse");
+          }, 1000);
+        }
+      } else {
+        notificationBadge.style.display = "none";
+      }
+      
+      notificationBadge.dataset.prevCount = num;
+    }
+
+    // Update header with app branding
+    function updateHeader() {
+      headerLogo.src = "https://blogger.googleusercontent.com/img/a/AVvXsEgW5dZpZAJIK5YbbeKlgkJV_igyvLVrYOjf8x9hRNXgJ6HkrhJ97QcDHnA96ufPb-GSfSlMYxScq5_EEzEa6Og2bkuocwzIDGWC-U1KfWczpfLGHyUuyBfr-y3FxCROBpfBRxFg2P0ko7atcJkS-zeAA3h-Dymv982OAitr5CYWlGCjx4gXpX2vzLr7";
+      headerLogo.style.display = "block";
+    }
+
+    // Setup theme toggle functionality
+    function setupThemeToggle() {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark") {
+        body.classList.add("dark-mode");
+      }
+      
+      themeToggle.addEventListener("click", () => {
+        body.classList.toggle("dark-mode");
+        const isDark = body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDark ? "dark" : "light");
+      });
+    }
+
+    // Setup navigation buttons
+    function setupNavigation() {
+      const currentPage = window.location.pathname.split("/").pop() || "index.html";
+      navBtns.forEach(btn => {
+        const btnPage = btn.getAttribute("href").split("/").pop();
+        if (btnPage === currentPage) {
+          btn.classList.add("active");
+        }
+      });
+    }
+
+    // Check user authentication state
+    function checkAuthState() {
+      auth.onAuthStateChanged((user) => {
+        currentUser = user;
+        if (user) {
+          // User is signed in
+          loadUserData(user.uid);
+          setupNotificationListener(user.uid);
+        } else {
+          // No user is signed in - set default balance
+          updateBalanceDisplay(0);
+        }
+      });
+    }
+
+    const fetchWithTimeout = async (url, options = {}, timeout = 10000) => {
+      const controller = new AbortController();
+      const id = setTimeout(() => controller.abort(), timeout);
+      try {
+        const resp = await fetch(url, { ...options, signal: controller.signal });
+        clearTimeout(id);
+        return resp;
+      } catch (err) {
+        clearTimeout(id);
+        throw err;
+      }
+    };
+
+    function setButtonSpinner(btn, show) {
+      if(!btn) return;
+      if(show) {
+        btn.disabled = true;
+        if(!btn.querySelector('.spinner')) {
+          const s = document.createElement('span');
+          s.className = 'spinner';
+          btn.prepend(s);
+        }
+      } else {
+        btn.disabled = false;
+        const s = btn.querySelector('.spinner');
+        if(s) s.remove();
+      }
+    }
+
+    const getNewEmail = async (deleteOld=false, forceNew = false) => {
+      // প্রতি রিফ্রেশে Mail change হবে না
+      if (!forceNew && !deleteOld && hasEmailGenerated) {
+        return;
+      }
+
+      setButtonSpinner(changeBtn, true);
+      setButtonSpinner(deleteBtn, true);
+
+      if(deleteOld && currentAccount.id) {
+        try {
+          await fetchWithTimeout(`${API_BASE}/accounts/${currentAccount.id}`, {
+            method:'DELETE', headers: { 'Authorization': `Bearer ${currentAccount.token}` }
+          });
+        } catch (e) { console.warn('delete old account failed', e); }
+      }
+
+      clearInterval(inboxInterval);
+      clearInterval(timerInterval);
+
+      try {
+        const domResp = await fetchWithTimeout(`${API_BASE}/domains`);
+        if(!domResp.ok) throw new Error('No domains');
+        const domJson = await domResp.json();
+        const list = domJson['hydra:member'] || [];
+        if(!list.length) throw new Error('No domains available');
+        const domain = list[0].domain;
+
+        const local = Math.random().toString(36).slice(2,10);
+        const address = `${local}@${domain}`;
+        const password = Math.random().toString(36).slice(2,12);
+
+        const accResp = await fetchWithTimeout(`${API_BASE}/accounts`, {
+          method:'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ address, password })
+        });
+        if(!accResp.ok) throw new Error('create account failed');
+        const accJson = await accResp.json();
+
+        const tokResp = await fetchWithTimeout(`${API_BASE}/token`, {
+          method:'POST',
+          headers: { 'Content-Type':'application/json' },
+          body: JSON.stringify({ address, password })
+        });
+        if(!tokResp.ok) throw new Error('token failed');
+        const tokJson = await tokResp.json();
+
+        currentAccount = { id: accJson.id, address, password, token: tokJson.token };
+        emailAddressEl.textContent = currentAccount.address;
+        hasEmailGenerated = true;
+
+        extendTimer();
+        checkInbox();
+        inboxInterval = setInterval(checkInbox, 10000);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setButtonSpinner(changeBtn, false);
+        setButtonSpinner(deleteBtn, false);
+      }
+    };
+
+    const checkInbox = async () => {
+      if(!currentAccount || !currentAccount.token) return;
+      setButtonSpinner(refreshBtn, true);
+      try {
+        const resp = await fetchWithTimeout(`${API_BASE}/messages`, {
+          headers: { 'Authorization': `Bearer ${currentAccount.token}` }
+        });
+        if(resp.status === 401) {
+          await getNewEmail(true, true);
+          return;
+        }
+        if(!resp.ok) throw new Error('fetch inbox failed');
+        const json = await resp.json();
+        renderInbox(json['hydra:member'] || []);
+      } catch (e) {
+        console.error('checkInbox error', e);
+      } finally {
+        setButtonSpinner(refreshBtn, false);
+      }
+    };
+
+    const renderInbox = (messages) => {
+      inboxList.innerHTML = '';
+      if(!messages || messages.length === 0) {
+        emptyInbox.style.display = 'block';
+        inboxList.style.display = 'none';
+        return;
+      }
+      emptyInbox.style.display = 'none';
+      inboxList.style.display = 'block';
+
+      messages.sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+      messages.forEach(msg => {
+        const div = document.createElement('div');
+        div.className = 'msg';
+        div.dataset.id = msg.id;
+        div.innerHTML = `
+          <div class="title">${escapeHTML((msg.from && (msg.from.name || msg.from.address)) || 'Unknown')}</div>
+          <div class="meta">
+            <div style="color:#6b7280; font-size:13px;">${escapeHTML(msg.subject || '(No subject)')}</div>
+            <div style="white-space:nowrap;">${formatDate(new Date(msg.createdAt))}</div>
+          </div>
+        `;
+        inboxList.appendChild(div);
+      });
+    };
+
+    const openEmail = async (id) => {
+      try {
+        const resp = await fetchWithTimeout(`${API_BASE}/messages/${id}`, {
+          headers: { 'Authorization': `Bearer ${currentAccount.token}` }
+        });
+        if(!resp.ok) throw new Error('fetch message failed');
+        const data = await resp.json();
+
+        emailSubjectHeader.textContent = data.subject || '(No subject)';
+        emailFrom.textContent = (data.from && (data.from.name || data.from.address)) || 'Unknown';
+        emailTo.textContent = currentAccount.address;
+        emailTimestamp.textContent = formatDate(new Date(data.createdAt));
+        emailAvatar.textContent = (emailFrom.textContent[0] || 'E').toUpperCase();
+
+        const html = (data.html && data.html[0]) ? data.html[0] : `<pre style="white-space:pre-wrap;">${escapeHTML(data.text || '')}</pre>`;
+        
+        // ইমেইল বডি সাদা ব্যাকগ্রাউন্ডে দেখানোর জন্য
+        const darkMode = body.classList.contains('dark-mode');
+        const styledHtml = darkMode ? 
+          `<html style="background: white !important; color: black !important;">${html}</html>` : 
+          html;
+        
+        emailBody.srcdoc = styledHtml;
+
+        document.getElementById('home').style.display = 'none';
+        emailScreen.style.display = 'block';
+        window.scrollTo({ top:0, behavior:'smooth' });
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    const showHome = () => {
+      emailScreen.style.display = 'none';
+      document.getElementById('home').style.display = 'block';
+      emailBody.srcdoc = '';
+    };
+
+    const copyToClipboard = async () => {
+      if(!currentAccount.address) return;
+      try {
+        await navigator.clipboard.writeText(currentAccount.address);
+        const originalText = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<span class="material">check</span>';
+        setTimeout(() => {
+          copyBtn.innerHTML = originalText;
+        }, 2000);
+      } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = currentAccount.address;
+        ta.style.position = 'fixed'; ta.style.left='0'; ta.style.top='0';
+        document.body.appendChild(ta); ta.focus(); ta.select();
+        try { document.execCommand('copy'); } catch(err){ console.error('copy failed', err); }
+        document.body.removeChild(ta);
+      }
+    };
+
+    const startTimer = () => {
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timerSeconds--;
+        const m = Math.floor(timerSeconds/60);
+        const s = timerSeconds%60;
+        timerDisplay.textContent = `${m}:${String(s).padStart(2,'0')}`;
+        if(timerSeconds <= 0) {
+          clearInterval(timerInterval);
+          // টাইমার শেষ হলে শুধু মেইল ডিলিট হবে না
+          timerDisplay.textContent = "00:00";
+          clearInterval(inboxInterval);
+        }
+      }, 1000);
+    };
+
+    function extendTimer() {
+      timerSeconds = 600;
+      if(!timerInterval) startTimer();
+      const m = Math.floor(timerSeconds/60);
+      const s = timerSeconds%60;
+      timerDisplay.textContent = `${m}:${String(s).padStart(2,'0')}`;
+    }
+
+    function escapeHTML(s) {
+      if(!s) return '';
+      return String(s).replace(/[&<>"']/g, (m) => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+    }
+
+    function formatDate(d) {
+      const now = new Date();
+      const diff = now - d;
+      const sec = Math.floor(diff/1000);
+      const min = Math.floor(sec/60);
+      const hr = Math.floor(min/60);
+      if(sec < 60) return 'just now';
+      if(min < 60) return `${min}m ago`;
+      if(hr < 24) return `${hr}h ago`;
+      return d.toLocaleDateString(undefined, { month:'short', day:'numeric' });
+    }
+
+    // Event Listeners
+    copyBtn.addEventListener('click', copyToClipboard);
+    changeBtn.addEventListener('click', () => getNewEmail(false, true)); // শুধু change বাটনে নতুন মেইল
+    deleteBtn.addEventListener('click', () => getNewEmail(true, true)); // delete বাটনে পুরানো মেইল ডিলিট করে নতুন
+    refreshBtn && refreshBtn.addEventListener('click', checkInbox);
+    extendBtn.addEventListener('click', extendTimer);
+    backBtn.addEventListener('click', showHome);
+    deleteMessageBtn.addEventListener('click', () => { showHome(); });
+
+    inboxList.addEventListener('click', (e) => {
+      const item = e.target.closest('[data-id]');
+      if(item) openEmail(item.dataset.id);
+    });
+
+    // Initialize
+    (function init(){
+      updateHeader(); // Call updateHeader function
+      setupThemeToggle();
+      setupNavigation();
+      checkAuthState(); // Check authentication and load balance
+      
+      // প্রথম লোডে শুধু একবার মেইল জেনারেট হবে
+      if (!hasEmailGenerated) {
+        getNewEmail(false, true);
+      }
+      
+      emailScreen.style.display = 'none';
+    })();
+
+  </script>
+</body>
+</html>
