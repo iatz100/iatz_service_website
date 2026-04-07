@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Lookup</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body{
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg,#020617,#0f172a);
+    height:100vh;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    color:#fff;
+}
+
+/* Container */
+.container{
+    width:350px;
+    padding:25px;
+    border-radius:20px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 40px rgba(0,0,0,0.5);
+    text-align:center;
+}
+
+/* Title */
+h2{
+    margin-bottom:20px;
+    font-weight:500;
+}
+
+/* Input */
+input{
+    width:100%;
+    padding:12px;
+    border-radius:12px;
+    border:2px solid #38bdf8;
+    outline:none;
+    margin-bottom:15px;
+    background:transparent;
+    color:#fff;
+}
+
+/* Button */
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:12px;
+    background: linear-gradient(45deg,#06b6d4,#3b82f6);
+    color:#fff;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    transform:scale(1.03);
+}
+
+/* Loader */
+.loader{
+    margin-top:20px;
+    border:4px solid rgba(255,255,255,0.1);
+    border-top:4px solid #38bdf8;
+    border-radius:50%;
+    width:35px;
+    height:35px;
+    animation:spin 1s linear infinite;
+    display:none;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+@keyframes spin{
+    0%{transform:rotate(0deg);}
+    100%{transform:rotate(360deg);}
+}
+
+/* Result */
+.result{
+    margin-top:20px;
+}
+
+.card{
+    background: rgba(255,255,255,0.05);
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:8px;
+}
+
+.key{
+    font-size:13px;
+    color:#38bdf8;
+}
+
+.value{
+    font-size:15px;
+    color:#facc15;
+}
+
+.error{
+    margin-top:15px;
+    color:red;
+}
+
+/* Developer Footer */
+.dev{
+    margin-top:20px;
+    font-size:14px;
+    color:#94a3b8;
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h2>📱 Number Lookup</h2>
+
+    <input type="text" id="number" placeholder="Enter Phone Number">
+
+    <button onclick="lookup()">Search</button>
+
+    <div class="loader" id="loader"></div>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+function lookup(){
+
+    let number = document.getElementById("number").value.trim();
+    let loader = document.getElementById("loader");
+    let result = document.getElementById("result");
+
+    if(number === ""){
+        alert("Enter number!");
+        return;
+    }
+
+    result.innerHTML = "";
+    loader.style.display = "block";
+
+    let api = "https://api.lookupnow.top/api/v1/query.php?key=pk_live_cc3c741098a085dd335c7bfccf59ad3e903a20ec&number=" + number;
+
+    fetch(api)
+    .then(res => res.json())
+    .then(data => {
+
+        loader.style.display = "none";
+
+        if(data.status !== "success" || !data.data){
+            result.innerHTML = "<div class='error'>❌ No Data Found</div>";
+            return;
+        }
+
+        let html = "";
+
+        for(let key in data.data){
+
+            let value = data.data[key];
+
+
+            if(key.toLowerCase().includes("dev") || key.toLowerCase().includes("credit")){
+                value = "iA TECH ZONE";
+            }
+
+            if(value === null || value === "") continue;
+
+            html += `
+            <div class="card">
+                <div class="key">${key}</div>
+                <div class="value">${value}</div>
+            </div>
+            `;
+        }
+
+        result.innerHTML = html;
+
+    })
+    .catch(()=>{
+        loader.style.display = "none";
+        result.innerHTML = "<div class='error'>❌ API Error</div>";
+    });
+}
+</script>
+
+</body>
+</html>
