@@ -693,7 +693,7 @@
             
             // Save additional user data to Firestore
             const cleanName = name.toLowerCase().replace(/\s+/g, "_");
-const customDocId = cleanName + "_kf:" + user.uid;
+const customDocId = cleanName + "_" + user.uid;
 
 await db.collection('users').doc(customDocId).set({
                 name: name,
