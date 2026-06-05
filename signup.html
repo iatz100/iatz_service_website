@@ -692,7 +692,10 @@
             const user = userCredential.user;
             
             // Save additional user data to Firestore
-            await db.collection('users').doc(user.uid).set({
+            const cleanName = name.toLowerCase().replace(/\s+/g, "_");
+const customDocId = cleanName + "_kf:" + user.uid;
+
+await db.collection('users').doc(customDocId).set({
                 name: name,
                 email: email,
                 phone: phone,
