@@ -844,41 +844,51 @@
         }
 
         // Load user data from Firestore
-        function loadUserData(userId) {
-            const userRef = firestore.collection('users').doc(userId);
-            
-            userRef.onSnapshot((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    
-                    profileNameText.textContent = userData.name || 'User';
-                    nameInput.value = userData.name || '';
-                    emailInput.value = userData.email || '';
-                    phoneInput.value = userData.phone || '';
-                    
-                    // Show Full User ID
-                    userIdElement.textContent = `User ID: ${userId}`;
-                    
-                    if (userData.balance !== undefined) {
-                        updateBalanceDisplay(userData.balance);
-                    }
-                    
-                    if (userData.avatarUrl) {
-                        currentAvatarUrl = userData.avatarUrl;
-                        profileAvatar.src = userData.avatarUrl;
-                    }
-                    
-                    if (userData.verified) {
-                        verifiedBadge.style.display = 'inline-flex';
-                        verifiedBadge.href = userData.verificationLink || '#';
-                    } else {
-                        verifiedBadge.style.display = 'none';
-                    }
-                }
-            }, (error) => {
-                console.error("Error loading user data:", error);
-            });
+        async function loadUserData(userId) {
+
+    try {
+
+        const querySnapshot = await firestore.collection('users')
+            .where('uid', '==', userId)
+            .limit(1)
+            .get();
+
+        if (!querySnapshot.empty) {
+
+            const userDoc = querySnapshot.docs[0];
+            const userData = userDoc.data();
+
+            profileNameText.textContent = userData.name || 'User';
+            nameInput.value = userData.name || '';
+            emailInput.value = userData.email || '';
+            phoneInput.value = userData.phone || '';
+
+            userIdElement.textContent = `User ID: ${userId}`;
+
+            if (userData.balance !== undefined) {
+                updateBalanceDisplay(userData.balance);
+            }
+
+            if (userData.avatarUrl) {
+                currentAvatarUrl = userData.avatarUrl;
+                profileAvatar.src = userData.avatarUrl;
+            }
+
+            if (userData.verified) {
+                verifiedBadge.style.display = 'inline-flex';
+                verifiedBadge.href = userData.verificationLink || '#';
+            } else {
+                verifiedBadge.style.display = 'none';
+            }
+
         }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+}
 
         // Setup real-time notification listener
         function setupNotificationListener(userId) {
@@ -916,63 +926,103 @@
         }
 
         // Update profile information
-        function updateProfile() {
-            if (!currentUser) {
-                window.location.href = 'signin.html';
-                return;
-            }
+        async function updateProfile() {
 
-            if (phoneInput.value.length > 11) {
-                return;
-            }
+    if (!currentUser) return;
 
-            const cleanName = nameInput.value.replace(/[\u{1F600}-\u{1F6FF}]/gu, '');
+    const cleanName = nameInput.value
+        .replace(/[\u{1F600}-\u{1F6FF}]/gu, '')
+        .trim();
 
-            const updates = {
-                name: cleanName,
-                phone: phoneInput.value,
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            firestore.collection('users').doc(currentUser.uid).update(updates)
-                .then(() => {
-                    profileNameText.textContent = updates.name;
-                })
-                .catch(error => {
-                    console.error("Error updating profile:", error);
+    try {
+
+        const querySnapshot = await firestore.collection('users')
+            .where('uid', '==', currentUser.uid)
+            .limit(1)
+            .get();
+
+        if (!querySnapshot.empty) {
+
+            const docId = querySnapshot.docs[0].id;
+
+            await firestore.collection('users')
+                .doc(docId)
+                .update({
+                    name: cleanName,
+                    phone: phoneInput.value,
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                 });
+
+            profileNameText.textContent = cleanName;
+
+            alert("Profile updated!");
+
         }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+}
 
         // Upload avatar image
-        function uploadAvatar(file) {
-            if (!currentUser || !file) return;
-            
-            const storageRef = storage.ref(`avatars/${currentUser.uid}`);
-            const uploadTask = storageRef.put(file);
-            
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    // Progress monitoring could be added here
-                }, 
-                (error) => {
-                    console.error("Upload error:", error);
-                }, 
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        firestore.collection('users').doc(currentUser.uid).update({
+        async function uploadAvatar(file) {
+
+    if (!currentUser || !file) return;
+
+    const storageRef = storage.ref(`avatars/${currentUser.uid}`);
+
+    const uploadTask = storageRef.put(file);
+
+    uploadTask.on('state_changed',
+
+        null,
+
+        (error) => {
+
+            console.error(error);
+
+        },
+
+        async () => {
+
+            try {
+
+                const downloadURL =
+                    await uploadTask.snapshot.ref.getDownloadURL();
+
+                const querySnapshot = await firestore.collection('users')
+                    .where('uid', '==', currentUser.uid)
+                    .limit(1)
+                    .get();
+
+                if (!querySnapshot.empty) {
+
+                    const docId = querySnapshot.docs[0].id;
+
+                    await firestore.collection('users')
+                        .doc(docId)
+                        .update({
                             avatarUrl: downloadURL
-                        })
-                        .then(() => {
-                            currentAvatarUrl = downloadURL;
-                            profileAvatar.src = downloadURL;
-                        })
-                        .catch(error => {
-                            console.error("Error updating avatar URL:", error);
                         });
-                    });
+
+                    profileAvatar.src = downloadURL;
+
+                    alert("Avatar updated!");
+
                 }
-            );
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
         }
+
+    );
+}
 
         // Logout user
         function logoutUser() {
