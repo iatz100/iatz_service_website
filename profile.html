@@ -849,36 +849,59 @@
     try {
 
         const querySnapshot = await firestore.collection('users')
-            .where('uid', '==', userId)
+            .where('email', '==', currentUser.email)
             .limit(1)
             .get();
 
         if (!querySnapshot.empty) {
 
             const userDoc = querySnapshot.docs[0];
+
             const userData = userDoc.data();
 
-            profileNameText.textContent = userData.name || 'User';
-            nameInput.value = userData.name || '';
-            emailInput.value = userData.email || '';
-            phoneInput.value = userData.phone || '';
+            profileNameText.textContent =
+                userData.name || 'User';
 
-            userIdElement.textContent = `User ID: ${userId}`;
+            nameInput.value =
+                userData.name || '';
+
+            emailInput.value =
+                userData.email || '';
+
+            phoneInput.value =
+                userData.phone || '';
+
+            userIdElement.textContent =
+                `User ID: ${userDoc.id}`;
 
             if (userData.balance !== undefined) {
+
                 updateBalanceDisplay(userData.balance);
+
             }
 
             if (userData.avatarUrl) {
-                currentAvatarUrl = userData.avatarUrl;
-                profileAvatar.src = userData.avatarUrl;
+
+                currentAvatarUrl =
+                    userData.avatarUrl;
+
+                profileAvatar.src =
+                    userData.avatarUrl;
+
             }
 
             if (userData.verified) {
-                verifiedBadge.style.display = 'inline-flex';
-                verifiedBadge.href = userData.verificationLink || '#';
+
+                verifiedBadge.style.display =
+                    'inline-flex';
+
+                verifiedBadge.href =
+                    userData.verificationLink || '#';
+
             } else {
+
                 verifiedBadge.style.display = 'none';
+
             }
 
         }
@@ -888,6 +911,7 @@
         console.error(error);
 
     }
+
 }
 
         // Setup real-time notification listener
@@ -937,33 +961,34 @@
     try {
 
         const querySnapshot = await firestore.collection('users')
-            .where('uid', '==', currentUser.uid)
-            .limit(1)
-            .get();
+    .where('email', '==', currentUser.email)
+    .limit(1)
+    .get();
 
-        if (!querySnapshot.empty) {
+if (!querySnapshot.empty) {
 
-            const docId = querySnapshot.docs[0].id;
+    const docId = querySnapshot.docs[0].id;
 
-            await firestore.collection('users')
-                .doc(docId)
-                .update({
-                    name: cleanName,
-                    phone: phoneInput.value,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
+    await firestore.collection('users')
+        .doc(docId)
+        .update({
+            name: cleanName,
+            phone: phoneInput.value,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+}
 
             profileNameText.textContent = cleanName;
 
-            alert("Profile updated!");
-
-        }
+alert("Profile updated!");
 
     } catch (error) {
 
         console.error(error);
 
     }
+
 }
 
         // Upload avatar image
@@ -993,25 +1018,25 @@
                     await uploadTask.snapshot.ref.getDownloadURL();
 
                 const querySnapshot = await firestore.collection('users')
-                    .where('uid', '==', currentUser.uid)
-                    .limit(1)
-                    .get();
+    .where('email', '==', currentUser.email)
+    .limit(1)
+    .get();
 
-                if (!querySnapshot.empty) {
+if (!querySnapshot.empty) {
 
-                    const docId = querySnapshot.docs[0].id;
+    const docId = querySnapshot.docs[0].id;
 
-                    await firestore.collection('users')
-                        .doc(docId)
-                        .update({
-                            avatarUrl: downloadURL
-                        });
+    await firestore.collection('users')
+        .doc(docId)
+        .update({
+            avatarUrl: downloadURL
+        });
+
+}
 
                     profileAvatar.src = downloadURL;
 
-                    alert("Avatar updated!");
-
-                }
+alert("Avatar updated!");
 
             } catch (error) {
 
@@ -1022,6 +1047,7 @@
         }
 
     );
+
 }
 
         // Logout user
