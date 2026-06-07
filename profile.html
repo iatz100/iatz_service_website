@@ -2,11 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Profile - Manage Picture</title>
-    <!-- Cropper.js CSS + JS -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
     <style>
         :root {
             --primary-color: #4a6bff;
@@ -369,30 +366,6 @@
             box-shadow: var(--shadow);
         }
         
-        /* Delete button styles - positioned left bottom */
-        .avatar-delete {
-            position: absolute;
-            bottom: 10px;
-            left: 10px;
-            background-color: var(--danger-color);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            transition: all 0.3s;
-            z-index: 5;
-        }
-        
-        .avatar-delete:hover {
-            transform: scale(1.05);
-            background-color: #c82333;
-        }
-        
         .avatar-upload input {
             display: none;
         }
@@ -528,6 +501,16 @@
             background-color: #555;
         }
         
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            opacity: 0.9;
+        }
+        
+        /* Verify Badge Styles - Facebook style with link */
         .verified-badge {
             display: inline-flex;
             align-items: center;
@@ -543,150 +526,193 @@
             object-fit: contain;
         }
         
-        /* Cropper Modal Overlay */
-        .cropper-modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 2000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.2s, opacity 0.2s;
-        }
-        
-        .cropper-modal-overlay.active {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        .cropper-container-box {
-            background: #fff;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 35px rgba(0,0,0,0.3);
-        }
-        
-        body.dark-mode .cropper-container-box {
-            background: #2d2d2d;
-        }
-        
-        .cropper-image-container {
-            width: 100%;
-            background: #111;
-        }
-        
-        #crop-image {
-            max-width: 100%;
-            display: block;
-        }
-        
-        .cropper-actions {
-            display: flex;
-            padding: 16px;
-            gap: 12px;
-            justify-content: flex-end;
-        }
-        
-        .crop-btn, .cancel-crop-btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        
-        .crop-btn {
-            background: var(--primary-color);
-            color: white;
-        }
-        
-        .cancel-crop-btn {
-            background: #e0e0e0;
-            color: #333;
-        }
-        
-        body.dark-mode .cancel-crop-btn {
-            background: #444;
-            color: white;
+        /* Responsive adjustments */
+        @media (min-width: 768px) {
+            .profile-container {
+                padding: 40px 20px;
+            }
+            
+            .logo {
+                height: 35px;
+            }
+            
+            .app-title {
+                font-size: 18px;
+            }
+            
+            .balance {
+                font-size: 14px;
+                padding: 6px 12px;
+            }
+            
+            .icon-btn {
+                font-size: 20px;
+            }
+            
+            .action-buttons {
+                flex-direction: row;
+            }
         }
         
         @media (max-width: 480px) {
-            .profile-avatar { width: 100px; height: 100px; }
-            .profile-form { padding: 20px; }
-            .action-buttons { flex-direction: column; }
-            .avatar-delete, .avatar-upload { width: 32px; height: 32px; bottom: 5px; }
+            .profile-avatar {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .profile-form {
+                padding: 20px;
+            }
+            
+            .app-title {
+                font-size: 14px;
+            }
+            
+            .logo {
+                height: 40px;
+            }
+            
+            .header-controls {
+                gap: 10px;
+            }
+            
+            .balance {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+            
+            .icon-btn {
+                font-size: 16px;
+            }
+            
+            .notification-badge {
+                width: 16px;
+                height: 16px;
+                font-size: 9px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .profile-name {
+                font-size: 20px;
+            }
+            
+            .user-id {
+                font-size: 14px;
+                padding: 0 5px;
+            }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
 </head>
 <body>
+    <!-- Background Animation -->
     <div class="bg-animation" id="bg-animation"></div>
+    
+    <!-- Header -->
     <header>
         <div class="logo-container">
-            <a href="index.html"><img src="" alt="App Logo" class="logo" id="header-logo"></a>
+            <a href="index.html">
+                <img src="" alt="App Logo" class="logo" id="header-logo">
+            </a>
             <div class="app-title" id="header-title"></div>
         </div>
+        
         <div class="header-controls">
-            <div class="balance-container"><span class="balance"><span id="user-balance">0.00</span>৳</span></div>
-            <button class="icon-btn theme-toggle" id="theme-toggle"><i class="fas fa-sun"></i><i class="fas fa-moon"></i></button>
-            <button class="icon-btn" id="orders-btn" onclick="window.location.href='orders.html'"><i class="fas fa-clipboard-list"></i></button>
-            <button class="icon-btn" id="notification-btn" onclick="window.location.href='notifications.html'"><i class="fas fa-bell"></i><span class="notification-badge" id="notification-badge">0</span></button>
+            <div class="balance-container">
+                <span class="balance"><span id="user-balance">0.00</span>৳</span>
+            </div>
+            <button class="icon-btn theme-toggle" id="theme-toggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="icon-btn" id="orders-btn" onclick="window.location.href='orders.html'">
+                <i class="fas fa-clipboard-list"></i>
+            </button>
+            <button class="icon-btn" id="notification-btn" onclick="window.location.href='notifications.html'">
+                <i class="fas fa-bell"></i>
+                <span class="notification-badge" id="notification-badge">0</span>
+            </button>
         </div>
     </header>
     
+    <!-- Main Content -->
     <div class="container">
         <div class="profile-container">
             <div class="profile-header">
                 <div class="profile-avatar-container">
                     <img src="https://i.postimg.cc/KzKPcLpD/profile.png" alt="Profile" class="profile-avatar" id="profile-avatar">
-                    <div class="avatar-delete" id="avatar-delete-btn" title="Delete Picture">
-                        <i class="fas fa-trash-alt"></i>
-                    </div>
                     <div class="avatar-upload">
                         <i class="fas fa-camera"></i>
-                        <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/jpg,image/webp,image/bmp,image/gif">
+                        <input type="file" id="avatar-input" accept="image/*">
                     </div>
                 </div>
-                <h1 class="profile-name"><span id="profile-name-text">Loading...</span><a href="#" class="verified-badge" id="verified-badge" style="display: none;" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/2048px-Twitter_Verified_Badge.svg.png" alt="Verified Badge"></a></h1>
+                <h1 class="profile-name">
+                    <span id="profile-name-text">Loading...</span>
+                    <a href="#" class="verified-badge" id="verified-badge" style="display: none;" target="_blank">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/2048px-Twitter_Verified_Badge.svg.png" alt="Verified Badge">
+                    </a>
+                </h1>
                 <div class="user-id" id="user-id">User ID: Loading...</div>
             </div>
             
             <div class="profile-form">
-                <div class="form-group"><label for="name">Full Name</label><input type="text" id="name" class="form-control" placeholder="Enter your name"></div>
-                <div class="form-group"><label for="email">Email Address</label><input type="email" id="email" class="form-control" placeholder="Enter your email" disabled></div>
-                <div class="form-group"><label for="phone">Phone Number</label><input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" maxlength="11"></div>
-                <div class="balance-display">Current Balance: <span id="balance">0.00</span>৳</div>
-                <div class="action-buttons"><button class="btn btn-primary" id="update-btn"><i class="fas fa-save"></i> Save Changes</button><button class="btn btn-secondary" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="Enter your name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" class="form-control" placeholder="Enter your email" disabled>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" maxlength="11">
+                </div>
+                
+                <div class="balance-display">
+                    Current Balance: <span id="balance">0.00</span>৳
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn btn-primary" id="update-btn">
+                        <i class="fas fa-save"></i> Save Changes
+                    </button>
+                    <button class="btn btn-secondary" id="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
+    <!-- Navigation Bar -->
     <nav class="bottom-nav">
-        <a href="payment.html" class="nav-btn" id="deposit-btn"><i class="fas fa-money-bill-wave"></i><span>Deposit</span></a>
-        <a href="index.html" class="nav-btn" id="home-btn"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="profile.html" class="nav-btn active" id="profile-btn"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="payment.html" class="nav-btn" id="deposit-btn">
+            <i class="fas fa-money-bill-wave"></i>
+            <span>Deposit</span>
+        </a>
+        <a href="index.html" class="nav-btn" id="home-btn">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="profile.html" class="nav-btn active" id="profile-btn">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
     </nav>
 
-    <!-- Crop Modal -->
-    <div id="cropModal" class="cropper-modal-overlay">
-        <div class="cropper-container-box">
-            <div class="cropper-image-container"><img id="crop-image" src="" alt="Crop"></div>
-            <div class="cropper-actions"><button class="cancel-crop-btn" id="cancelCropBtn">Cancel</button><button class="crop-btn" id="confirmCropBtn">Crop & Upload</button></div>
-        </div>
-    </div>
-
     <script>
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCEn86IfdTNcvEmQuNP-KCvrmMABagcdkc",
             authDomain: "web-iatz.firebaseapp.com",
@@ -696,9 +722,12 @@
             appId: "1:264921056318:web:c77e93fad660665bdfbd6f",
             databaseURL: "https://web-iatz-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const firestore = firebase.firestore();
+        const storage = firebase.storage();
 
         // DOM elements
         const userBalance = document.getElementById('user-balance');
@@ -714,264 +743,400 @@
         const avatarInput = document.getElementById('avatar-input');
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const headerLogo = document.getElementById('header-logo');
+        const headerTitle = document.getElementById('header-title');
         const notificationBadge = document.getElementById('notification-badge');
         const verifiedBadge = document.getElementById('verified-badge');
         const bgAnimation = document.getElementById('bg-animation');
-        const headerLogo = document.getElementById('header-logo');
-        const headerTitle = document.getElementById('header-title');
-        const avatarDeleteBtn = document.getElementById('avatar-delete-btn');
 
+        // App state
         let currentUser = null;
-        let currentDocId = null;
-        let cropper = null;
+        let currentAvatarUrl = '';
 
-        // ImgBB API Key (Provided)
-        const IMGBB_API_KEY = "5ada4371cd9552f1f58824d5f0cb2ef5";
-        const IMGBB_UPLOAD_URL = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
+        // Initialize the app
+        function init() {
+            setDefaultHeader();
+            setupThemeToggle();
+            setupNavigation();
+            initializeFirebaseAuth();
+            setupEventListeners();
+            createBackgroundAnimation();
+        }
 
+        // Create background animation
         function createBackgroundAnimation() {
-            for (let i = 0; i < 15; i++) {
+            const bubbleCount = 15;
+            
+            for (let i = 0; i < bubbleCount; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bg-bubble');
+                
+                // Random size between 20px and 100px
                 const size = Math.random() * 80 + 20;
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
+                
+                // Random position
                 bubble.style.left = `${Math.random() * 100}%`;
                 bubble.style.top = `${Math.random() * 100}%`;
-                bubble.style.animationDelay = `${Math.random() * 5}s`;
-                bubble.style.animationDuration = `${Math.random() * 10 + 10}s`;
+                
+                // Random animation delay and duration
+                const delay = Math.random() * 5;
+                const duration = Math.random() * 10 + 10;
+                bubble.style.animationDelay = `${delay}s`;
+                bubble.style.animationDuration = `${duration}s`;
+                
                 bgAnimation.appendChild(bubble);
             }
         }
 
-        async function loadHeaderFromFirestore() {
-            try {
-                const headerRef = firestore.collection('settings').doc('general');
-                const doc = await headerRef.get();
+        // Update header with default values
+        function updateHeader() {
+            headerLogo.src = "https://blogger.googleusercontent.com/img/a/AVvXsEgW5dZpZAJIK5YbbeKlgkJV_igyvLVrYOjf8x9hRNXgJ6HkrhJ97QcDHnA96ufPb-GSfSlMYxScq5_EEzEa6Og2bkuocwzIDGWC-U1KfWczpfLGHyUuyBfr-y3FxCROBpfBRxFg2P0ko7atcJkS-zeAA3h-Dymv982OAitr5CYWlGCjx4gXpX2vzLr7";
+            headerLogo.style.display = 'block';
+        }
+
+        // Set default header values first, then try to load from Firestore
+        function setDefaultHeader() {
+            updateHeader();
+            loadHeaderFromFirestore();
+        }
+
+        function loadHeaderFromFirestore() {
+            const headerRef = firestore.collection('settings').doc('general');
+            
+            headerRef.get().then((doc) => {
                 if (doc.exists) {
                     const data = doc.data();
-                    if (data.headerLogoUrl) headerLogo.src = data.headerLogoUrl;
-                    if (data.siteTitle) headerTitle.textContent = data.siteTitle;
-                }
-            } catch(e) { console.error(e); }
-        }
-        function setDefaultHeader() { headerLogo.src = "https://blogger.googleusercontent.com/img/a/AVvXsEgW5dZpZAJIK5YbbeKlgkJV_igyvLVrYOjf8x9hRNXgJ6HkrhJ97QcDHnA96ufPb-GSfSlMYxScq5_EEzEa6Og2bkuocwzIDGWC-U1KfWczpfLGHyUuyBfr-y3FxCROBpfBRxFg2P0ko7atcJkS-zeAA3h-Dymv982OAitr5CYWlGCjx4gXpX2vzLr7"; loadHeaderFromFirestore(); }
-
-        async function loadUserData(userId) {
-            try {
-                const querySnapshot = await firestore.collection('users').where('email', '==', currentUser.email).limit(1).get();
-                if (!querySnapshot.empty) {
-                    const userDoc = querySnapshot.docs[0];
-                    currentDocId = userDoc.id;
-                    const userData = userDoc.data();
-                    profileNameText.textContent = userData.name || 'User';
-                    nameInput.value = userData.name || '';
-                    emailInput.value = userData.email || '';
-                    phoneInput.value = userData.phone || '';
-                    userIdElement.textContent = `User ID: ${userDoc.id}`;
-                    if (userData.balance !== undefined) updateBalanceDisplay(userData.balance);
-                    // ProfilePicture field from Firestore
-                    if (userData.ProfilePicture) {
-                        profileAvatar.src = userData.ProfilePicture;
-                    } else if (userData.avatarUrl) {
-                        profileAvatar.src = userData.avatarUrl;
-                    } else {
-                        profileAvatar.src = "https://i.postimg.cc/KzKPcLpD/profile.png";
+                    
+                    if (data.headerLogoUrl) {
+                        headerLogo.src = data.headerLogoUrl;
+                        headerLogo.style.display = 'block';
+                        headerLogo.onerror = () => {
+                            headerLogo.src = 'https://via.placeholder.com/150x50?text=Logo+Not+Found';
+                        };
                     }
-                    if (userData.verified) {
-                        verifiedBadge.style.display = 'inline-flex';
-                        verifiedBadge.href = userData.verificationLink || '#';
-                    } else verifiedBadge.style.display = 'none';
+                    
+                    if (data.siteTitle) {
+                        headerTitle.textContent = data.siteTitle;
+                    }
                 }
-            } catch(error) { console.error("loadUserData", error); }
-        }
-
-        function updateBalanceDisplay(balance) {
-            const formatted = parseFloat(balance).toFixed(2);
-            userBalance.textContent = formatted;
-            profileBalance.textContent = formatted;
-            userBalance.parentElement.classList.add('update');
-            setTimeout(() => userBalance.parentElement.classList.remove('update'), 300);
-        }
-
-        function setupNotificationListener(userId) {
-            firestore.collection('notifications').where('userId', '==', userId).where('read', '==', false)
-                .onSnapshot((snap) => updateNotificationBadge(snap.size), err => console.error(err));
-        }
-        function updateNotificationBadge(count) {
-            if (count > 0) { notificationBadge.textContent = count; notificationBadge.style.display = 'flex'; if (count > parseInt(notificationBadge.dataset.prevCount || 0)) { notificationBadge.classList.add('pulse'); setTimeout(() => notificationBadge.classList.remove('pulse'), 1000); } }
-            else notificationBadge.style.display = 'none';
-            notificationBadge.dataset.prevCount = count;
-        }
-
-        async function updateProfile() {
-            if (!currentUser || !currentDocId) return;
-            const cleanName = nameInput.value.replace(/[\u{1F600}-\u{1F6FF}]/gu, '').trim();
-            try {
-                await firestore.collection('users').doc(currentDocId).update({
-                    name: cleanName,
-                    phone: phoneInput.value,
-                    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                profileNameText.textContent = cleanName;
-                alert("Profile updated!");
-            } catch(error) { console.error(error); alert("Update failed."); }
-        }
-
-        // DELETE Profile Picture
-        async function deleteProfilePicture() {
-            if (!currentDocId) return;
-            const confirmDelete = confirm("Are you sure you want to remove your profile picture?");
-            if (!confirmDelete) return;
-            try {
-                const defaultAvatar = "https://i.postimg.cc/KzKPcLpD/profile.png";
-                await firestore.collection('users').doc(currentDocId).update({
-                    ProfilePicture: defaultAvatar
-                });
-                profileAvatar.src = defaultAvatar;
-                alert("Profile picture removed.");
-            } catch(error) {
-                console.error("Delete error:", error);
-                alert("Failed to delete picture.");
-            }
-        }
-
-        // Crop + Upload Logic
-        function showCropModal(imageFile) {
-            const modal = document.getElementById('cropModal');
-            const cropImg = document.getElementById('crop-image');
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                cropImg.src = e.target.result;
-                if (cropper) cropper.destroy();
-                cropper = new Cropper(cropImg, {
-                    aspectRatio: 1,
-                    viewMode: 1,
-                    dragMode: 'move',
-                    autoCropArea: 1,
-                    cropBoxMovable: true,
-                    cropBoxResizable: true,
-                    background: false
-                });
-                modal.classList.add('active');
-            };
-            reader.readAsDataURL(imageFile);
-        }
-
-        function getCroppedBlob() {
-            return new Promise((resolve) => {
-                if (!cropper) resolve(null);
-                cropper.getCroppedCanvas({ width: 512, height: 512, imageSmoothingQuality: 'high' }).toBlob((blob) => {
-                    resolve(blob);
-                }, 'image/jpeg', 0.9);
+            }).catch((error) => {
+                console.error("Error loading header:", error);
+                headerLogo.src = 'https://via.placeholder.com/150x50?text=Error+Loading+Logo';
             });
         }
 
-        async function uploadToImgBB(blob) {
-            const formData = new FormData();
-            formData.append('image', blob, 'avatar.jpg');
-            try {
-                const response = await fetch(IMGBB_UPLOAD_URL, { method: 'POST', body: formData });
-                const result = await response.json();
-                if (result.success) {
-                    return result.data.url;
-                } else {
-                    throw new Error('ImgBB upload failed: ' + (result.error?.message || 'Unknown error'));
-                }
-            } catch (err) {
-                console.error(err);
-                throw new Error('Failed to upload to ImgBB');
-            }
-        }
-
-        async function finalUploadAndSave(blob) {
-            if (!currentUser || !currentDocId) return;
-            try {
-                const imgbbUrl = await uploadToImgBB(blob);
-                // Saving in ProfilePicture field as requested
-                await firestore.collection('users').doc(currentDocId).update({ ProfilePicture: imgbbUrl });
-                profileAvatar.src = imgbbUrl;
-                alert("Profile picture updated successfully!");
-            } catch (error) {
-                console.error("Avatar upload error:", error);
-                alert("Image upload failed. Check API key or file format.");
-            }
-        }
-
-        function handleAvatarUpload(file) {
-            if (!file) return;
-            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/bmp', 'image/gif'];
-            if (!allowedTypes.includes(file.type)) {
-                alert('Unsupported format. Please use JPG, PNG, WEBP, BMP, or GIF.');
-                return;
-            }
-            showCropModal(file);
-        }
-
-        // Event Listeners
-        document.getElementById('confirmCropBtn').addEventListener('click', async () => {
-            if (!cropper) return;
-            const croppedBlob = await getCroppedBlob();
-            if (croppedBlob) {
-                await finalUploadAndSave(croppedBlob);
-                closeCropModal();
-            }
-        });
-
-        function closeCropModal() {
-            const modal = document.getElementById('cropModal');
-            modal.classList.remove('active');
-            if (cropper) { cropper.destroy(); cropper = null; }
-        }
-        document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
-        document.getElementById('cropModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('cropModal')) closeCropModal();
-        });
-
-        avatarDeleteBtn.addEventListener('click', deleteProfilePicture);
-        avatarInput.addEventListener('change', (e) => {
-            if (e.target.files && e.target.files[0]) handleAvatarUpload(e.target.files[0]);
-            avatarInput.value = '';
-        });
-
-        async function logoutUser() { await auth.signOut(); window.location.href = 'signin.html'; }
-        function setupThemeToggle() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') body.classList.add('dark-mode');
-            themeToggle.addEventListener('click', () => {
-                body.classList.toggle('dark-mode');
-                localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
-            });
-        }
-
-        function setupEventListeners() {
-            updateBtn.addEventListener('click', updateProfile);
-            logoutBtn.addEventListener('click', logoutUser);
-            nameInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') updateProfile(); });
-            phoneInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') updateProfile(); });
-            phoneInput.addEventListener('input', (e) => { if (e.target.value.length > 11) e.target.value = e.target.value.slice(0, 11); });
-        }
-
+        // Firebase Authentication
         function initializeFirebaseAuth() {
-            auth.onAuthStateChanged(async (userAuth) => {
+            auth.onAuthStateChanged((userAuth) => {
                 currentUser = userAuth;
                 if (userAuth) {
-                    await loadUserData(userAuth.uid);
+                    loadUserData(userAuth.uid);
                     setupNotificationListener(userAuth.uid);
                 } else {
                     window.location.href = 'signin.html';
                 }
+            }, (error) => {
+                console.error("Auth state error:", error);
             });
         }
 
-        function init() {
-            setDefaultHeader();
-            setupThemeToggle();
-            setupEventListeners();
-            initializeFirebaseAuth();
-            createBackgroundAnimation();
-            document.getElementById('profile-btn').classList.add('active');
+        // Load user data from Firestore
+        async function loadUserData(userId) {
+
+    try {
+
+        const querySnapshot = await firestore.collection('users')
+            .where('email', '==', currentUser.email)
+            .limit(1)
+            .get();
+
+        if (!querySnapshot.empty) {
+
+            const userDoc = querySnapshot.docs[0];
+
+            const userData = userDoc.data();
+
+            profileNameText.textContent =
+                userData.name || 'User';
+
+            nameInput.value =
+                userData.name || '';
+
+            emailInput.value =
+                userData.email || '';
+
+            phoneInput.value =
+                userData.phone || '';
+
+            userIdElement.textContent =
+                `User ID: ${userDoc.id}`;
+
+            if (userData.balance !== undefined) {
+
+                updateBalanceDisplay(userData.balance);
+
+            }
+
+            if (userData.avatarUrl) {
+
+                currentAvatarUrl =
+                    userData.avatarUrl;
+
+                profileAvatar.src =
+                    userData.avatarUrl;
+
+            }
+
+            if (userData.verified) {
+
+                verifiedBadge.style.display =
+                    'inline-flex';
+
+                verifiedBadge.href =
+                    userData.verificationLink || '#';
+
+            } else {
+
+                verifiedBadge.style.display = 'none';
+
+            }
+
         }
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+        // Setup real-time notification listener
+        function setupNotificationListener(userId) {
+            const notificationsRef = firestore.collection('notifications')
+                .where('userId', '==', userId)
+                .where('read', '==', false);
+                
+            notificationsRef.onSnapshot((snapshot) => {
+                const unreadCount = snapshot.size;
+                updateNotificationBadge(unreadCount);
+            }, (error) => {
+                console.error("Notification listener error:", error);
+            });
+        }
+
+        // Update notification badge with animation
+        function updateNotificationBadge(count) {
+            const num = parseInt(count) || 0;
+            
+            if (num > 0) {
+                notificationBadge.textContent = num;
+                notificationBadge.style.display = 'flex';
+                
+                if (num > parseInt(notificationBadge.dataset.prevCount || 0)) {
+                    notificationBadge.classList.add('pulse');
+                    setTimeout(() => {
+                        notificationBadge.classList.remove('pulse');
+                    }, 1000);
+                }
+            } else {
+                notificationBadge.style.display = 'none';
+            }
+            
+            notificationBadge.dataset.prevCount = num;
+        }
+
+        // Update profile information
+        async function updateProfile() {
+
+    if (!currentUser) return;
+
+    const cleanName = nameInput.value
+        .replace(/[\u{1F600}-\u{1F6FF}]/gu, '')
+        .trim();
+
+    try {
+
+        const querySnapshot = await firestore.collection('users')
+    .where('email', '==', currentUser.email)
+    .limit(1)
+    .get();
+
+if (!querySnapshot.empty) {
+
+    const docId = querySnapshot.docs[0].id;
+
+    await firestore.collection('users')
+        .doc(docId)
+        .update({
+            name: cleanName,
+            phone: phoneInput.value,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+}
+
+            profileNameText.textContent = cleanName;
+
+alert("Profile updated!");
+
+    } catch (error) {
+
+        console.error(error);
+
+    }
+
+}
+
+        // Upload avatar image
+        async function uploadAvatar(file) {
+
+    if (!currentUser || !file) return;
+
+    const storageRef = storage.ref(`avatars/${currentUser.uid}`);
+
+    const uploadTask = storageRef.put(file);
+
+    uploadTask.on('state_changed',
+
+        null,
+
+        (error) => {
+
+            console.error(error);
+
+        },
+
+        async () => {
+
+            try {
+
+                const downloadURL =
+                    await uploadTask.snapshot.ref.getDownloadURL();
+
+                const querySnapshot = await firestore.collection('users')
+    .where('email', '==', currentUser.email)
+    .limit(1)
+    .get();
+
+if (!querySnapshot.empty) {
+
+    const docId = querySnapshot.docs[0].id;
+
+    await firestore.collection('users')
+        .doc(docId)
+        .update({
+            avatarUrl: downloadURL
+        });
+
+}
+
+                    profileAvatar.src = downloadURL;
+
+alert("Avatar updated!");
+
+            } catch (error) {
+
+                console.error(error);
+
+            }
+
+        }
+
+    );
+
+}
+
+        // Logout user
+        function logoutUser() {
+            auth.signOut()
+                .then(() => {
+                    window.location.href = 'signin.html';
+                })
+                .catch(error => {
+                    console.error("Logout error:", error);
+                });
+        }
+
+        // Update balance display in both header and profile
+        function updateBalanceDisplay(balance) {
+            const formattedBalance = parseFloat(balance).toFixed(2);
+            userBalance.textContent = formattedBalance;
+            profileBalance.textContent = formattedBalance;
+            
+            userBalance.parentElement.classList.add('update');
+            setTimeout(() => {
+                userBalance.parentElement.classList.remove('update');
+            }, 300);
+        }
+
+        // Setup theme toggle functionality
+        function setupThemeToggle() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+            }
+            
+            themeToggle.addEventListener('click', () => {
+                body.classList.toggle('dark-mode');
+                const isDark = body.classList.contains('dark-mode');
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        }
+
+        // Setup navigation buttons
+        function setupNavigation() {
+            document.getElementById('profile-btn').classList.add('active');
+            
+            // Removed the problematic event listeners that were causing
+            // navigation issues for authenticated users
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            updateBtn.addEventListener('click', updateProfile);
+            logoutBtn.addEventListener('click', logoutUser);
+            
+            avatarInput.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    uploadAvatar(file);
+                }
+            });
+            
+            nameInput.addEventListener('keypress', (e) => {
+                const char = String.fromCharCode(e.which);
+                if (/[\u{1F600}-\u{1F6FF}]/u.test(char)) {
+                    e.preventDefault();
+                }
+            });
+            
+            nameInput.addEventListener('paste', (e) => {
+                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                if (/[\u{1F600}-\u{1F6FF}]/u.test(pastedText)) {
+                    e.preventDefault();
+                }
+            });
+            
+            phoneInput.addEventListener('input', (e) => {
+                if (e.target.value.length > 11) {
+                    e.target.value = e.target.value.slice(0, 11);
+                }
+            });
+            
+            nameInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') updateProfile();
+            });
+            
+            phoneInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') updateProfile();
+            });
+        }
+
+        // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
