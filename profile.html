@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Profile</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
     <style>
         :root {
             --primary-color: #4a6bff;
@@ -17,9 +19,7 @@
             --dark-secondary: #2d2d2d;
             --dark-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
             --success-color: #4CAF50;
-            --warning-color: #FFC107;
             --danger-color: #dc3545;
-            --verified-color: #1877f2;
         }
         
         * {
@@ -37,8 +37,8 @@
             flex-direction: column;
             min-height: 100vh;
             transition: background-color 0.3s, color 0.3s;
-            padding-top: 50px;
-            padding-bottom: 70px;
+            padding-top: 36px;
+            padding-bottom: 50px;
             position: relative;
             overflow-x: hidden;
         }
@@ -85,7 +85,6 @@
             }
         }
         
-        /* Header Styles */
         header {
             display: flex;
             justify-content: space-between;
@@ -115,6 +114,7 @@
             gap: 10px;
             max-width: 50%;
             overflow: hidden;
+            height: 100%;
         }
         
         .logo {
@@ -137,12 +137,14 @@
             display: flex;
             align-items: center;
             gap: 15px;
+            height: 100%;
         }
         
         .balance-container {
             display: flex;
             align-items: center;
             gap: 8px;
+            height: 100%;
         }
         
         .balance {
@@ -242,7 +244,6 @@
             opacity: 1;
         }
         
-        /* Navigation Bar */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -308,53 +309,36 @@
             border-radius: 50%;
         }
         
-        /* Profile Content Styles */
         .container {
-            width: 100%;
-            max-width: 100%;
-            padding: 0;
-            flex: 1;
-        }
-        
-        .profile-container {
             width: 100%;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 0;
         }
         
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .cover-container {
             position: relative;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, var(--primary-color), #6a8bff);
+            overflow: hidden;
         }
         
-        .profile-avatar-container {
-            position: relative;
-            display: inline-block;
-            margin-bottom: 15px;
+        body.dark-mode .cover-container {
+            background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
         }
         
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
+        .cover-photo {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border: 5px solid var(--white);
-            box-shadow: var(--shadow);
-            cursor: pointer;
-            transition: all 0.3s;
         }
         
-        .profile-avatar:hover {
-            opacity: 0.8;
-        }
-        
-        .avatar-upload {
+        .cover-upload-btn {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background-color: var(--primary-color);
+            bottom: 12px;
+            right: 12px;
+            background-color: rgba(0,0,0,0.6);
             color: white;
             width: 36px;
             height: 36px;
@@ -363,47 +347,178 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            backdrop-filter: blur(5px);
+            transition: all 0.3s;
+            z-index: 10;
+        }
+        
+        .cover-upload-btn:hover {
+            background-color: rgba(0,0,0,0.8);
+            transform: scale(1.05);
+        }
+        
+        /* Profile Header */
+        .profile-header {
+            position: relative;
+            padding: 0 20px;
+            margin-top: -60px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-end;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .profile-avatar-container {
+            position: relative;
+            display: inline-block;
+            flex-shrink: 0;
+            margin-bottom: -10px;
+            transform: translateY(-8px);
+        }
+        
+        .profile-avatar {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid var(--white);
             box-shadow: var(--shadow);
+            background-color: var(--white);
+            transition: transform 0.2s;
         }
         
-        .avatar-upload input {
-            display: none;
-        }
-        
-        .profile-name {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 5px;
+        .avatar-upload {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background-color: var(--primary-color);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            z-index: 10;
+            transition: transform 0.2s;
+        }
+        
+        .avatar-upload:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-menu {
+            position: absolute;
+            bottom: 55px;
+            right: 0px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            z-index: 200;
+            min-width: 170px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.2s ease;
+            transform-origin: bottom right;
+        }
+        
+        body.dark-mode .avatar-menu {
+            background: var(--dark-secondary);
+            box-shadow: var(--dark-shadow);
+        }
+        
+        .avatar-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-color);
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+        
+        body.dark-mode .menu-item {
+            color: var(--dark-text);
+        }
+        
+        .menu-item:hover {
+            background: rgba(0,0,0,0.05);
+        }
+        
+        body.dark-mode .menu-item:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .menu-item.danger {
+            color: var(--danger-color);
+        }
+        
+        .profile-name-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding-top: 20px;
+            padding-bottom: 28px;
+            flex: 1;
+        }
+        
+        .profile-name-wrapper {
+            display: flex;
+            align-items: center;
             gap: 8px;
+            flex-wrap: wrap;
         }
         
-        .user-id {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 15px;
-            word-break: break-all;
-            padding: 0 10px;
-            max-width: 100%;
-            overflow-wrap: break-word;
+        .profile-name {
+            font-size: 32px;
+            font-weight: 900;
+            font-family: 'Segoe UI', 'Poppins', system-ui, sans-serif;
+            line-height: 1.2;
+            color: var(--text-color);
+            word-break: break-word;
+            letter-spacing: -0.3px;
         }
         
-        body.dark-mode .user-id {
-            color: #aaa;
+        body.dark-mode .profile-name {
+            color: var(--dark-text);
+        }
+        
+        .verified-badge {
+            display: inline-flex;
+            width: 26px;
+            height: 26px;
+            transition: transform 0.2s;
+        }
+        
+        .verified-badge img {
+            width: 100%;
+            height: 100%;
         }
         
         .profile-form {
             background-color: var(--white);
             border-radius: 12px;
-            padding: 30px;
+            padding: 25px;
             box-shadow: var(--shadow);
+            margin: 0 20px 20px 20px;
         }
         
         body.dark-mode .profile-form {
             background-color: var(--dark-secondary);
-            box-shadow: var(--dark-shadow);
         }
         
         .form-group {
@@ -414,11 +529,6 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: var(--text-color);
-        }
-        
-        body.dark-mode .form-group label {
-            color: var(--dark-text);
         }
         
         .form-control {
@@ -440,21 +550,20 @@
         
         .form-control:focus {
             border-color: var(--primary-color);
+            outline: none;
             box-shadow: 0 0 0 2px rgba(74, 107, 255, 0.2);
         }
         
-        .balance-display {
-            font-size: 24px;
-            font-weight: 700;
-            margin: 20px 0;
-            text-align: center;
-            color: var(--primary-color);
+        .form-control:disabled {
+            background-color: #f5f5f5;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         
         .action-buttons {
             display: flex;
             gap: 15px;
-            margin-top: 30px;
+            margin-bottom: 15px;
         }
         
         .btn {
@@ -475,7 +584,6 @@
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-color), #6a8bff);
             color: var(--white);
-            box-shadow: 0 4px 10px rgba(74, 107, 255, 0.3);
         }
         
         .btn-primary:hover {
@@ -483,87 +591,140 @@
             transform: translateY(-2px);
         }
         
-        .btn-secondary {
-            background-color: #f0f0f0;
-            color: var(--text-color);
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
         }
         
-        body.dark-mode .btn-secondary {
-            background-color: #444;
-            color: var(--dark-text);
-        }
-        
-        .btn-secondary:hover {
-            background-color: #e0e0e0;
-        }
-        
-        body.dark-mode .btn-secondary:hover {
-            background-color: #555;
-        }
-        
-        .btn-danger {
-            background-color: var(--danger-color);
+        .btn-edit {
+            background-color: var(--primary-color);
             color: white;
         }
         
-        .btn-danger:hover {
+        .btn-edit:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .btn-logout {
+            background-color: var(--danger-color);
+            color: white;
+            width: 100%;
+        }
+        
+        .btn-logout:hover {
             opacity: 0.9;
         }
         
-        /* Verify Badge Styles - Facebook style with link */
-        .verified-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 20px;
-            height: 20px;
-            vertical-align: middle;
+        .toast-notification {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow);
+            pointer-events: none;
+            white-space: nowrap;
         }
         
-        .verified-badge img {
+        .toast-notification.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .toast-notification.success {
+            background-color: var(--success-color);
+        }
+        
+        .toast-notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        .cropper-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            object-fit: contain;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            visibility: hidden;
+            opacity: 0;
+            transition: visibility 0.2s, opacity 0.2s;
         }
         
-        /* Responsive adjustments */
-        @media (min-width: 768px) {
-            .profile-container {
-                padding: 40px 20px;
-            }
-            
-            .logo {
-                height: 35px;
-            }
-            
-            .app-title {
-                font-size: 18px;
-            }
-            
-            .balance {
-                font-size: 14px;
-                padding: 6px 12px;
-            }
-            
-            .icon-btn {
-                font-size: 20px;
-            }
-            
-            .action-buttons {
-                flex-direction: row;
-            }
+        .cropper-modal-overlay.active {
+            visibility: visible;
+            opacity: 1;
         }
         
+        .cropper-container-box {
+            background: #fff;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+        
+        .cropper-image-container {
+            max-height: 400px;
+            overflow: hidden;
+        }
+        
+        #crop-image {
+            max-width: 100%;
+            display: block;
+        }
+        
+        .cropper-actions {
+            display: flex;
+            padding: 16px;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+        
+        .crop-btn, .cancel-crop-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .crop-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .crop-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+        
+        .cancel-crop-btn {
+            background: #ccc;
+            color: #333;
+        }
+        
+        .cancel-crop-btn:hover {
+            background: #bbb;
+        }
+        
+        /* Responsive */
         @media (max-width: 480px) {
-            .profile-avatar {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .profile-form {
-                padding: 20px;
-            }
-            
             .app-title {
                 font-size: 14px;
             }
@@ -591,29 +752,37 @@
                 font-size: 9px;
             }
             
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .profile-name {
-                font-size: 20px;
-            }
-            
-            .user-id {
-                font-size: 14px;
-                padding: 0 5px;
-            }
+            .profile-avatar { width: 100px; height: 100px; }
+            .profile-header { margin-top: -45px; gap: 12px; align-items: center; }
+            .profile-name { font-size: 24px; font-weight: 900; }
+            .profile-name-section { padding-bottom: 18px; }
+            .cover-container { height: 160px; }
+            .action-buttons { flex-direction: row; }
+            .toast-notification { white-space: normal; text-align: center; max-width: 90%; }
+            .avatar-upload { width: 30px; height: 30px; bottom: 5px; right: 5px; }
+            .avatar-upload i { font-size: 12px; }
+            .profile-name-wrapper { gap: 4px; }
+            .verified-badge { width: 20px; height: 20px; }
+            .profile-avatar-container { transform: translateY(-4px); margin-bottom: -5px; }
+            .avatar-menu { min-width: 150px; right: 0px; bottom: 48px; }
+            .menu-item { padding: 10px 16px; font-size: 13px; }
+        }
+        
+        @media (max-width: 380px) {
+            .profile-header { flex-wrap: wrap; margin-top: -35px; }
+            .profile-name-section { padding-bottom: 0; }
+            .profile-avatar { width: 90px; height: 90px; }
+            .profile-name { font-size: 20px; }
+            .avatar-menu { right: -5px; min-width: 145px; }
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase SDK -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap">
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-storage-compat.js"></script>
 </head>
 <body>
-    <!-- Background Animation -->
     <div class="bg-animation" id="bg-animation"></div>
     
     <!-- Header -->
@@ -643,59 +812,62 @@
         </div>
     </header>
     
-    <!-- Main Content -->
+    <!-- Main Profile Content -->
     <div class="container">
-        <div class="profile-container">
-            <div class="profile-header">
-                <div class="profile-avatar-container">
-                    <img src="https://i.postimg.cc/KzKPcLpD/profile.png" alt="Profile" class="profile-avatar" id="profile-avatar">
-                    <div class="avatar-upload">
-                        <i class="fas fa-camera"></i>
-                        <input type="file" id="avatar-input" accept="image/*">
-                    </div>
+        <div class="cover-container">
+            <img src="https://i.postimg.cc/25d6stC3/cover.jpg" alt="Cover" class="cover-photo" id="cover-photo">
+            <div class="cover-upload-btn" id="cover-upload-btn"><i class="fas fa-camera"></i></div>
+            <input type="file" id="cover-input" accept="image/jpeg,image/png,image/jpg,image/webp" style="display: none;">
+        </div>
+        
+        <div class="profile-header">
+            <div class="profile-avatar-container">
+                <img src="https://i.postimg.cc/Fs02VXpt/profile.png" alt="Profile" class="profile-avatar" id="profile-avatar">
+                <div class="avatar-upload" id="avatar-menu-btn"><i class="fas fa-camera"></i></div>
+                <div class="avatar-menu" id="avatar-menu">
+                    <div class="menu-item" id="menu-upload"><i class="fas fa-upload"></i> Upload Picture</div>
+                    <div class="menu-item danger" id="menu-remove"><i class="fas fa-trash-alt"></i> Remove Picture</div>
                 </div>
-                <h1 class="profile-name">
-                    <span id="profile-name-text">Loading...</span>
-                    <a href="#" class="verified-badge" id="verified-badge" style="display: none;" target="_blank">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/2048px-Twitter_Verified_Badge.svg.png" alt="Verified Badge">
-                    </a>
-                </h1>
-                <div class="user-id" id="user-id">User ID: Loading...</div>
+                <input type="file" id="avatar-input" accept="image/jpeg,image/png,image/jpg,image/webp,image/bmp,image/gif" style="display: none;">
             </div>
-            
-            <div class="profile-form">
-                <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input type="text" id="name" class="form-control" placeholder="Enter your name">
-                </div>
-                
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" class="form-control" placeholder="Enter your email" disabled>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" maxlength="11">
-                </div>
-                
-                <div class="balance-display">
-                    Current Balance: <span id="balance">0.00</span>৳
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-primary" id="update-btn">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
-                    <button class="btn btn-secondary" id="logout-btn">
-                        <i class="fas fa-sign-out-alt"></i> Logout
-                    </button>
+            <div class="profile-name-section">
+                <div class="profile-name-wrapper">
+                    <span class="profile-name" id="profile-name-text">User</span>
+                    <a href="#" class="verified-badge" id="verified-badge" style="display: none;" target="_blank">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e4/Twitter_Verified_Badge.svg/2048px-Twitter_Verified_Badge.svg.png" alt="Verified">
+                    </a>
                 </div>
             </div>
         </div>
+        
+        <div class="profile-form">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="name" class="form-control" placeholder="Enter your name" disabled value="">
+            </div>
+            <div class="form-group">
+                <label>User ID</label>
+                <input type="text" id="user-id-field" class="form-control" placeholder="User ID" disabled value="">
+            </div>
+            <div class="form-group">
+                <label>Email Address</label>
+                <input type="email" id="email" class="form-control" placeholder="Enter your email" disabled value="">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="tel" id="phone" class="form-control" placeholder="Enter your phone number" maxlength="11" disabled value="">
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-edit" id="edit-btn"><i class="fas fa-edit"></i> Edit</button>
+                <button class="btn btn-primary" id="update-btn" disabled><i class="fas fa-save"></i> Save Changes</button>
+            </div>
+            
+            <button class="btn btn-logout" id="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
     </div>
     
-    <!-- Navigation Bar -->
+    <!-- Bottom Navigation -->
     <nav class="bottom-nav">
         <a href="payment.html" class="nav-btn" id="deposit-btn">
             <i class="fas fa-money-bill-wave"></i>
@@ -711,6 +883,21 @@
         </a>
     </nav>
 
+    <!-- Cropper Modal -->
+    <div id="cropModal" class="cropper-modal-overlay">
+        <div class="cropper-container-box">
+            <div class="cropper-image-container">
+                <img id="crop-image" src="" alt="Crop">
+            </div>
+            <div class="cropper-actions">
+                <button class="cancel-crop-btn" id="cancelCropBtn">Cancel</button>
+                <button class="crop-btn" id="confirmCropBtn">Crop & Upload</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastMsg" class="toast-notification"></div>
+
     <script>
         // Firebase Configuration
         const firebaseConfig = {
@@ -719,424 +906,494 @@
             projectId: "web-iatz",
             storageBucket: "web-iatz.appspot.com",
             messagingSenderId: "264921056318",
-            appId: "1:264921056318:web:c77e93fad660665bdfbd6f",
-            databaseURL: "https://web-iatz-default-rtdb.asia-southeast1.firebasedatabase.app"
+            appId: "1:264921056318:web:c77e93fad660665bdfbd6f"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const firestore = firebase.firestore();
-        const storage = firebase.storage();
 
-        // DOM elements
+        // Default Images
+        const DEFAULT_PROFILE_PIC = "https://i.postimg.cc/Fs02VXpt/profile.png";
+        const DEFAULT_COVER_PIC = "https://i.postimg.cc/25d6stC3/cover.jpg";
+
+        // DOM Elements
         const userBalance = document.getElementById('user-balance');
-        const profileBalance = document.getElementById('balance');
         const profileNameText = document.getElementById('profile-name-text');
-        const userIdElement = document.getElementById('user-id');
+        const userIdField = document.getElementById('user-id-field');
         const profileAvatar = document.getElementById('profile-avatar');
+        const coverPhoto = document.getElementById('cover-photo');
         const nameInput = document.getElementById('name');
         const emailInput = document.getElementById('email');
         const phoneInput = document.getElementById('phone');
         const updateBtn = document.getElementById('update-btn');
+        const editBtn = document.getElementById('edit-btn');
         const logoutBtn = document.getElementById('logout-btn');
         const avatarInput = document.getElementById('avatar-input');
+        const coverInput = document.getElementById('cover-input');
         const themeToggle = document.getElementById('theme-toggle');
         const body = document.body;
-        const navBtns = document.querySelectorAll('.nav-btn');
         const headerLogo = document.getElementById('header-logo');
         const headerTitle = document.getElementById('header-title');
         const notificationBadge = document.getElementById('notification-badge');
         const verifiedBadge = document.getElementById('verified-badge');
         const bgAnimation = document.getElementById('bg-animation');
+        const avatarMenuBtn = document.getElementById('avatar-menu-btn');
+        const avatarMenu = document.getElementById('avatar-menu');
+        const menuUpload = document.getElementById('menu-upload');
+        const menuRemove = document.getElementById('menu-remove');
+        const coverUploadBtn = document.getElementById('cover-upload-btn');
+        const toastMsg = document.getElementById('toastMsg');
 
-        // App state
         let currentUser = null;
-        let currentAvatarUrl = '';
-
-        // Initialize the app
-        function init() {
-            setDefaultHeader();
-            setupThemeToggle();
-            setupNavigation();
-            initializeFirebaseAuth();
-            setupEventListeners();
-            createBackgroundAnimation();
+        let currentDocId = null;
+        let cropper = null;
+        let isEditMode = false;
+        let pendingImageFile = null;
+        
+        let cachedUserData = {
+            name: 'User',
+            email: '',
+            phone: '',
+            userId: '',
+            balance: 0,
+            profilePic: DEFAULT_PROFILE_PIC,
+            coverPic: DEFAULT_COVER_PIC,
+            verified: false,
+            verificationLink: '#'
+        };
+        
+        function applyCachedDataToUI() {
+            profileNameText.textContent = cachedUserData.name;
+            nameInput.value = cachedUserData.name;
+            emailInput.value = cachedUserData.email;
+            phoneInput.value = cachedUserData.phone;
+            userIdField.value = cachedUserData.userId;
+            userBalance.textContent = parseFloat(cachedUserData.balance).toFixed(2);
+            profileAvatar.src = cachedUserData.profilePic || DEFAULT_PROFILE_PIC;
+            coverPhoto.src = cachedUserData.coverPic || DEFAULT_COVER_PIC;
+            if (cachedUserData.verified) {
+                verifiedBadge.style.display = 'inline-flex';
+                verifiedBadge.href = cachedUserData.verificationLink;
+            } else {
+                verifiedBadge.style.display = 'none';
+            }
         }
 
-        // Create background animation
+        async function silentDataRefresh() {
+            if (!currentUser) return;
+            try {
+                const querySnapshot = await firestore.collection('users').where('email', '==', currentUser.email).limit(1).get();
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    currentDocId = userDoc.id;
+                    const userData = userDoc.data();
+                    cachedUserData.name = userData.name || 'User';
+                    cachedUserData.email = userData.email || '';
+                    cachedUserData.phone = userData.phone || '';
+                    cachedUserData.userId = userData.userId || userDoc.id;
+                    cachedUserData.balance = userData.balance !== undefined ? userData.balance : 0;
+                    cachedUserData.profilePic = userData.ProfilePicture || DEFAULT_PROFILE_PIC;
+                    cachedUserData.coverPic = userData.CoverPhoto || DEFAULT_COVER_PIC;
+                    cachedUserData.verified = userData.verified || false;
+                    cachedUserData.verificationLink = userData.verificationLink || '#';
+                    
+                    profileNameText.textContent = cachedUserData.name;
+                    nameInput.value = cachedUserData.name;
+                    emailInput.value = cachedUserData.email;
+                    phoneInput.value = cachedUserData.phone;
+                    userIdField.value = cachedUserData.userId;
+                    userBalance.textContent = parseFloat(cachedUserData.balance).toFixed(2);
+                    if (profileAvatar.src !== cachedUserData.profilePic) profileAvatar.src = cachedUserData.profilePic;
+                    if (coverPhoto.src !== cachedUserData.coverPic) coverPhoto.src = cachedUserData.coverPic;
+                    if (cachedUserData.verified) { verifiedBadge.style.display = 'inline-flex'; verifiedBadge.href = cachedUserData.verificationLink; } 
+                    else { verifiedBadge.style.display = 'none'; }
+                    
+                    userBalance.parentElement.classList.add('update');
+                    setTimeout(() => userBalance.parentElement.classList.remove('update'), 300);
+                }
+            } catch (error) { console.error('Silent refresh error:', error); }
+        }
+
+        async function initializeWithCachedData() {
+            if (!currentUser) return;
+            try {
+                const querySnapshot = await firestore.collection('users').where('email', '==', currentUser.email).limit(1).get();
+                if (!querySnapshot.empty) {
+                    const userDoc = querySnapshot.docs[0];
+                    currentDocId = userDoc.id;
+                    const userData = userDoc.data();
+                    cachedUserData.name = userData.name || 'User';
+                    cachedUserData.email = userData.email || '';
+                    cachedUserData.phone = userData.phone || '';
+                    cachedUserData.userId = userData.userId || userDoc.id;
+                    cachedUserData.balance = userData.balance !== undefined ? userData.balance : 0;
+                    cachedUserData.profilePic = userData.ProfilePicture || DEFAULT_PROFILE_PIC;
+                    cachedUserData.coverPic = userData.CoverPhoto || DEFAULT_COVER_PIC;
+                    cachedUserData.verified = userData.verified || false;
+                    cachedUserData.verificationLink = userData.verificationLink || '#';
+                    applyCachedDataToUI();
+                } else {
+                    applyCachedDataToUI();
+                }
+            } catch (error) { console.error('Initial load error:', error); }
+            setInterval(() => { if (currentUser && !isEditMode) silentDataRefresh(); }, 30000);
+        }
+
+        function showToast(message, type = 'success') {
+            toastMsg.textContent = message;
+            toastMsg.className = `toast-notification ${type}`;
+            toastMsg.classList.add('show');
+            setTimeout(() => toastMsg.classList.remove('show'), 3000);
+        }
+
         function createBackgroundAnimation() {
-            const bubbleCount = 15;
-            
-            for (let i = 0; i < bubbleCount; i++) {
+            for (let i = 0; i < 15; i++) {
                 const bubble = document.createElement('div');
                 bubble.classList.add('bg-bubble');
-                
-                // Random size between 20px and 100px
                 const size = Math.random() * 80 + 20;
                 bubble.style.width = `${size}px`;
                 bubble.style.height = `${size}px`;
-                
-                // Random position
                 bubble.style.left = `${Math.random() * 100}%`;
                 bubble.style.top = `${Math.random() * 100}%`;
-                
-                // Random animation delay and duration
-                const delay = Math.random() * 5;
-                const duration = Math.random() * 10 + 10;
-                bubble.style.animationDelay = `${delay}s`;
-                bubble.style.animationDuration = `${duration}s`;
-                
+                bubble.style.animationDelay = `${Math.random() * 5}s`;
+                bubble.style.animationDuration = `${Math.random() * 10 + 10}s`;
                 bgAnimation.appendChild(bubble);
             }
         }
 
-        // Update header with default values
-        function updateHeader() {
+        function setDefaultHeader() {
             headerLogo.src = "https://blogger.googleusercontent.com/img/a/AVvXsEgW5dZpZAJIK5YbbeKlgkJV_igyvLVrYOjf8x9hRNXgJ6HkrhJ97QcDHnA96ufPb-GSfSlMYxScq5_EEzEa6Og2bkuocwzIDGWC-U1KfWczpfLGHyUuyBfr-y3FxCROBpfBRxFg2P0ko7atcJkS-zeAA3h-Dymv982OAitr5CYWlGCjx4gXpX2vzLr7";
             headerLogo.style.display = 'block';
-        }
-
-        // Set default header values first, then try to load from Firestore
-        function setDefaultHeader() {
-            updateHeader();
-            loadHeaderFromFirestore();
-        }
-
-        function loadHeaderFromFirestore() {
-            const headerRef = firestore.collection('settings').doc('general');
-            
-            headerRef.get().then((doc) => {
+            firestore.collection('settings').doc('general').get().then(doc => {
                 if (doc.exists) {
-                    const data = doc.data();
-                    
-                    if (data.headerLogoUrl) {
-                        headerLogo.src = data.headerLogoUrl;
-                        headerLogo.style.display = 'block';
-                        headerLogo.onerror = () => {
-                            headerLogo.src = 'https://via.placeholder.com/150x50?text=Logo+Not+Found';
-                        };
-                    }
-                    
-                    if (data.siteTitle) {
-                        headerTitle.textContent = data.siteTitle;
-                    }
+                    if (doc.data().headerLogoUrl) headerLogo.src = doc.data().headerLogoUrl;
+                    if (doc.data().siteTitle) headerTitle.textContent = doc.data().siteTitle;
                 }
-            }).catch((error) => {
-                console.error("Error loading header:", error);
-                headerLogo.src = 'https://via.placeholder.com/150x50?text=Error+Loading+Logo';
-            });
+            }).catch(console.error);
         }
 
-        // Firebase Authentication
-        function initializeFirebaseAuth() {
-            auth.onAuthStateChanged((userAuth) => {
-                currentUser = userAuth;
-                if (userAuth) {
-                    loadUserData(userAuth.uid);
-                    setupNotificationListener(userAuth.uid);
-                } else {
-                    window.location.href = 'signin.html';
-                }
-            }, (error) => {
-                console.error("Auth state error:", error);
-            });
-        }
-
-        // Load user data from Firestore
-        async function loadUserData(userId) {
-
-    try {
-
-        const querySnapshot = await firestore.collection('users')
-            .where('email', '==', currentUser.email)
-            .limit(1)
-            .get();
-
-        if (!querySnapshot.empty) {
-
-            const userDoc = querySnapshot.docs[0];
-
-            const userData = userDoc.data();
-
-            profileNameText.textContent =
-                userData.name || 'User';
-
-            nameInput.value =
-                userData.name || '';
-
-            emailInput.value =
-                userData.email || '';
-
-            phoneInput.value =
-                userData.phone || '';
-
-            userIdElement.textContent =
-                `User ID: ${userDoc.id}`;
-
-            if (userData.balance !== undefined) {
-
-                updateBalanceDisplay(userData.balance);
-
-            }
-
-            if (userData.avatarUrl) {
-
-                currentAvatarUrl =
-                    userData.avatarUrl;
-
-                profileAvatar.src =
-                    userData.avatarUrl;
-
-            }
-
-            if (userData.verified) {
-
-                verifiedBadge.style.display =
-                    'inline-flex';
-
-                verifiedBadge.href =
-                    userData.verificationLink || '#';
-
-            } else {
-
-                verifiedBadge.style.display = 'none';
-
-            }
-
-        }
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
-
-}
-
-        // Setup real-time notification listener
         function setupNotificationListener(userId) {
-            const notificationsRef = firestore.collection('notifications')
-                .where('userId', '==', userId)
-                .where('read', '==', false);
-                
-            notificationsRef.onSnapshot((snapshot) => {
-                const unreadCount = snapshot.size;
-                updateNotificationBadge(unreadCount);
-            }, (error) => {
-                console.error("Notification listener error:", error);
-            });
-        }
-
-        // Update notification badge with animation
-        function updateNotificationBadge(count) {
-            const num = parseInt(count) || 0;
-            
-            if (num > 0) {
-                notificationBadge.textContent = num;
-                notificationBadge.style.display = 'flex';
-                
-                if (num > parseInt(notificationBadge.dataset.prevCount || 0)) {
-                    notificationBadge.classList.add('pulse');
-                    setTimeout(() => {
-                        notificationBadge.classList.remove('pulse');
-                    }, 1000);
-                }
-            } else {
-                notificationBadge.style.display = 'none';
-            }
-            
-            notificationBadge.dataset.prevCount = num;
-        }
-
-        // Update profile information
-        async function updateProfile() {
-
-    if (!currentUser) return;
-
-    const cleanName = nameInput.value
-        .replace(/[\u{1F600}-\u{1F6FF}]/gu, '')
-        .trim();
-
-    try {
-
-        const querySnapshot = await firestore.collection('users')
-    .where('email', '==', currentUser.email)
-    .limit(1)
-    .get();
-
-if (!querySnapshot.empty) {
-
-    const docId = querySnapshot.docs[0].id;
-
-    await firestore.collection('users')
-        .doc(docId)
-        .update({
-            name: cleanName,
-            phone: phoneInput.value,
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-
-}
-
-            profileNameText.textContent = cleanName;
-
-alert("Profile updated!");
-
-    } catch (error) {
-
-        console.error(error);
-
-    }
-
-}
-
-        // Upload avatar image
-        async function uploadAvatar(file) {
-
-    if (!currentUser || !file) return;
-
-    const storageRef = storage.ref(`avatars/${currentUser.uid}`);
-
-    const uploadTask = storageRef.put(file);
-
-    uploadTask.on('state_changed',
-
-        null,
-
-        (error) => {
-
-            console.error(error);
-
-        },
-
-        async () => {
-
-            try {
-
-                const downloadURL =
-                    await uploadTask.snapshot.ref.getDownloadURL();
-
-                const querySnapshot = await firestore.collection('users')
-    .where('email', '==', currentUser.email)
-    .limit(1)
-    .get();
-
-if (!querySnapshot.empty) {
-
-    const docId = querySnapshot.docs[0].id;
-
-    await firestore.collection('users')
-        .doc(docId)
-        .update({
-            avatarUrl: downloadURL
-        });
-
-}
-
-                    profileAvatar.src = downloadURL;
-
-alert("Avatar updated!");
-
-            } catch (error) {
-
-                console.error(error);
-
-            }
-
-        }
-
-    );
-
-}
-
-        // Logout user
-        function logoutUser() {
-            auth.signOut()
-                .then(() => {
-                    window.location.href = 'signin.html';
-                })
-                .catch(error => {
-                    console.error("Logout error:", error);
+            firestore.collection('notifications').where('userId', '==', userId).where('read', '==', false)
+                .onSnapshot(snap => { 
+                    const count = snap.size; 
+                    if(count > 0) {
+                        notificationBadge.textContent = count; 
+                        notificationBadge.style.display = 'flex';
+                        notificationBadge.classList.add('pulse');
+                        setTimeout(() => notificationBadge.classList.remove('pulse'), 500);
+                    } else {
+                        notificationBadge.style.display = 'none';
+                    }
                 });
         }
 
-        // Update balance display in both header and profile
-        function updateBalanceDisplay(balance) {
-            const formattedBalance = parseFloat(balance).toFixed(2);
-            userBalance.textContent = formattedBalance;
-            profileBalance.textContent = formattedBalance;
-            
-            userBalance.parentElement.classList.add('update');
-            setTimeout(() => {
-                userBalance.parentElement.classList.remove('update');
-            }, 300);
+        async function updateProfile() {
+            if (!currentUser || !currentDocId || !isEditMode) return;
+            const newName = nameInput.value.trim();
+            const newEmail = emailInput.value.trim();
+            const newPhone = phoneInput.value.trim();
+            const newUserId = userIdField.value.trim();
+            if (!newName) { showToast("Name cannot be empty!", "error"); return; }
+            if (!newEmail) { showToast("Email cannot be empty!", "error"); return; }
+            try {
+                if (newEmail !== currentUser.email) { await currentUser.updateEmail(newEmail); await currentUser.reload(); }
+                await firestore.collection('users').doc(currentDocId).update({ 
+                    name: newName, 
+                    email: newEmail, 
+                    phone: newPhone, 
+                    userId: newUserId || currentDocId, 
+                    updatedAt: firebase.firestore.FieldValue.serverTimestamp() 
+                });
+                cachedUserData.name = newName; 
+                cachedUserData.email = newEmail; 
+                cachedUserData.phone = newPhone; 
+                cachedUserData.userId = newUserId || currentDocId;
+                applyCachedDataToUI();
+                isEditMode = false;
+                nameInput.disabled = emailInput.disabled = phoneInput.disabled = userIdField.disabled = true;
+                updateBtn.disabled = true;
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                editBtn.style.backgroundColor = '';
+                showToast("Profile updated successfully!", "success");
+            } catch (error) { showToast("Update failed: " + error.message, "error"); }
         }
 
-        // Setup theme toggle functionality
-        function setupThemeToggle() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                body.classList.add('dark-mode');
+        async function removeProfilePicture() {
+            if (!currentDocId) return;
+            try {
+                await firestore.collection('users').doc(currentDocId).update({ ProfilePicture: DEFAULT_PROFILE_PIC });
+                cachedUserData.profilePic = DEFAULT_PROFILE_PIC;
+                profileAvatar.src = DEFAULT_PROFILE_PIC;
+                showToast("Profile picture removed!", "success");
+            } catch(error) { showToast("Failed to remove picture!", "error"); }
+        }
+
+        // Show Cropper Modal
+        function showCropModal(imageFile) {
+            const modal = document.getElementById('cropModal');
+            const imgElement = document.getElementById('crop-image');
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                imgElement.src = e.target.result;
+                if (cropper) {
+                    cropper.destroy();
+                }
+                // Initialize cropper after image loads
+                setTimeout(() => {
+                    cropper = new Cropper(imgElement, {
+                        aspectRatio: 1,
+                        viewMode: 1,
+                        dragMode: 'move',
+                        autoCropArea: 0.8,
+                        cropBoxMovable: true,
+                        cropBoxResizable: true,
+                        background: false,
+                        modal: true,
+                        guides: true,
+                        center: true,
+                        highlight: true
+                    });
+                    modal.classList.add('active');
+                }, 100);
+            };
+            reader.readAsDataURL(imageFile);
+        }
+
+        // Close Cropper Modal
+        function closeCropModal() {
+            const modal = document.getElementById('cropModal');
+            modal.classList.remove('active');
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+        }
+
+        // Confirm Crop and Upload
+        async function confirmCropAndUpload() {
+            if (!cropper) return;
+            
+            try {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 512,
+                    height: 512
+                });
+                
+                if (!canvas) {
+                    showToast("Failed to crop image!", "error");
+                    return;
+                }
+                
+                // Show loading toast
+                showToast("Uploading...", "success");
+                
+                // Convert canvas to blob
+                canvas.toBlob(async (blob) => {
+                    if (blob) {
+                        await uploadAndSaveImage(blob, false);
+                        closeCropModal();
+                    } else {
+                        showToast("Failed to process image!", "error");
+                    }
+                }, 'image/jpeg', 0.9);
+                
+            } catch (error) {
+                console.error("Crop error:", error);
+                showToast("Crop failed!", "error");
+            }
+        }
+
+        const IMGBB_API_KEY = "5ada4371cd9552f1f58824d5f0cb2ef5";
+        const IMGBB_UPLOAD_URL = `https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`;
+        
+        async function uploadAndSaveImage(blob, isCover = false) {
+            if (!currentDocId) {
+                showToast("Please wait, loading profile...", "error");
+                return;
             }
             
+            try {
+                const formData = new FormData();
+                formData.append('image', blob, isCover ? 'cover.jpg' : 'avatar.jpg');
+                
+                const response = await fetch(IMGBB_UPLOAD_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const url = result.data.url;
+                    
+                    if (isCover) {
+                        await firestore.collection('users').doc(currentDocId).update({ CoverPhoto: url });
+                        cachedUserData.coverPic = url;
+                        coverPhoto.src = url;
+                        showToast("Cover photo updated!", "success");
+                    } else {
+                        await firestore.collection('users').doc(currentDocId).update({ ProfilePicture: url });
+                        cachedUserData.profilePic = url;
+                        profileAvatar.src = url;
+                        showToast("Profile picture updated!", "success");
+                    }
+                } else {
+                    throw new Error(result.error?.message || 'Upload failed');
+                }
+            } catch (error) {
+                console.error("Upload error:", error);
+                showToast("Upload failed! Please try again.", "error");
+            }
+        }
+
+        async function uploadCoverDirect(file) {
+            if (!file) return;
+            if (!currentDocId) {
+                showToast("Please wait, loading profile...", "error");
+                return;
+            }
+            
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast("Unsupported format! Use JPG, PNG or WEBP", "error");
+                return;
+            }
+            
+            try {
+                showToast("Uploading cover...", "success");
+                const formData = new FormData();
+                formData.append('image', file);
+                
+                const response = await fetch(IMGBB_UPLOAD_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    const url = result.data.url;
+                    await firestore.collection('users').doc(currentDocId).update({ CoverPhoto: url });
+                    cachedUserData.coverPic = url;
+                    coverPhoto.src = url;
+                    showToast("Cover photo updated!", "success");
+                } else {
+                    throw new Error('Upload failed');
+                }
+            } catch (error) {
+                console.error("Cover upload error:", error);
+                showToast("Cover upload failed!", "error");
+            }
+        }
+
+        function handleAvatarUpload(file) {
+            if (!file) return;
+            if (!currentDocId) {
+                showToast("Please wait, loading profile...", "error");
+                return;
+            }
+            
+            const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp', 'image/bmp', 'image/gif'];
+            if (!allowedTypes.includes(file.type)) {
+                showToast("Unsupported format! Use JPG, PNG, WEBP, BMP or GIF", "error");
+                return;
+            }
+            
+            // Show crop modal
+            showCropModal(file);
+        }
+
+        function toggleEditMode() {
+            if (isEditMode) { 
+                isEditMode = false; 
+                nameInput.disabled = emailInput.disabled = phoneInput.disabled = userIdField.disabled = true; 
+                updateBtn.disabled = true; 
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit'; 
+                editBtn.style.backgroundColor = ''; 
+                silentDataRefresh(); 
+            } else { 
+                isEditMode = true; 
+                nameInput.disabled = emailInput.disabled = phoneInput.disabled = userIdField.disabled = false; 
+                updateBtn.disabled = false; 
+                editBtn.innerHTML = '<i class="fas fa-times"></i> Cancel'; 
+                editBtn.style.backgroundColor = '#dc3545'; 
+            }
+        }
+
+        function toggleMenu(e) { e.stopPropagation(); avatarMenu.classList.toggle('show'); }
+        function closeMenu() { avatarMenu.classList.remove('show'); }
+        function triggerUpload() { closeMenu(); avatarInput.click(); }
+        function triggerRemove() { closeMenu(); removeProfilePicture(); }
+        function logoutUser() { auth.signOut().then(() => window.location.href = 'signin.html'); }
+        
+        function setupThemeToggle() { 
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') body.classList.add('dark-mode');
             themeToggle.addEventListener('click', () => {
                 body.classList.toggle('dark-mode');
-                const isDark = body.classList.contains('dark-mode');
-                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                localStorage.setItem('theme', body.classList.contains('dark-mode') ? 'dark' : 'light');
             });
         }
 
-        // Setup navigation buttons
-        function setupNavigation() {
-            document.getElementById('profile-btn').classList.add('active');
-            
-            // Removed the problematic event listeners that were causing
-            // navigation issues for authenticated users
-        }
-
-        // Setup event listeners
         function setupEventListeners() {
+            editBtn.addEventListener('click', toggleEditMode);
             updateBtn.addEventListener('click', updateProfile);
             logoutBtn.addEventListener('click', logoutUser);
+            avatarMenuBtn.addEventListener('click', toggleMenu);
+            menuUpload.addEventListener('click', triggerUpload);
+            menuRemove.addEventListener('click', triggerRemove);
+            coverUploadBtn.addEventListener('click', () => coverInput.click());
+            document.addEventListener('click', (e) => { if (!avatarMenuBtn.contains(e.target) && !avatarMenu.contains(e.target)) closeMenu(); });
             
-            avatarInput.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    uploadAvatar(file);
+            // Cropper modal buttons
+            document.getElementById('confirmCropBtn').addEventListener('click', confirmCropAndUpload);
+            document.getElementById('cancelCropBtn').addEventListener('click', closeCropModal);
+            
+            // File inputs
+            avatarInput.addEventListener('change', (e) => { 
+                if (e.target.files && e.target.files[0]) {
+                    handleAvatarUpload(e.target.files[0]);
                 }
+                avatarInput.value = '';
             });
             
-            nameInput.addEventListener('keypress', (e) => {
-                const char = String.fromCharCode(e.which);
-                if (/[\u{1F600}-\u{1F6FF}]/u.test(char)) {
-                    e.preventDefault();
+            coverInput.addEventListener('change', (e) => { 
+                if (e.target.files && e.target.files[0]) {
+                    uploadCoverDirect(e.target.files[0]);
                 }
+                coverInput.value = '';
             });
             
-            nameInput.addEventListener('paste', (e) => {
-                const pastedText = (e.clipboardData || window.clipboardData).getData('text');
-                if (/[\u{1F600}-\u{1F6FF}]/u.test(pastedText)) {
-                    e.preventDefault();
-                }
-            });
-            
-            phoneInput.addEventListener('input', (e) => {
+            phoneInput.addEventListener('input', (e) => { 
                 if (e.target.value.length > 11) {
                     e.target.value = e.target.value.slice(0, 11);
                 }
             });
-            
-            nameInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') updateProfile();
-            });
-            
-            phoneInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') updateProfile();
+        }
+
+        function initializeFirebaseAuth() {
+            auth.onAuthStateChanged(async (userAuth) => {
+                if (userAuth) { 
+                    currentUser = userAuth; 
+                    await initializeWithCachedData(); 
+                    setupNotificationListener(userAuth.uid); 
+                } else { 
+                    window.location.href = 'signin.html'; 
+                }
             });
         }
 
-        // Initialize the app when DOM is loaded
+        function init() {
+            setDefaultHeader(); 
+            setupThemeToggle(); 
+            setupEventListeners(); 
+            initializeFirebaseAuth(); 
+            createBackgroundAnimation(); 
+            applyCachedDataToUI();
+        }
+        
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
