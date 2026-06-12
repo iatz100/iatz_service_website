@@ -74,7 +74,6 @@
             background: #ff4d4d;
         }
 
-        /* Logo*/
         .logo-area h1{
         font-size: 42px;
         font-weight: 900;
@@ -87,7 +86,6 @@
         }
         }
         
-        /* Channel Card Styles */
         .channel-card {
             background: var(--bg-card);
             border-radius: 16px;
@@ -189,7 +187,7 @@
         .sticky-header {
             position: sticky;
             top: 0;
-            z-index: 50;
+            z-index: 1000;
             background: var(--bg-header);
             border-bottom: 2px solid var(--border-color);
             padding: 0.7rem 1.2rem;
@@ -252,6 +250,7 @@
             overflow-x: hidden;
             position: relative;
             width: 100%;
+             z-index: 1001;
         }
         .ticker-badge {
             background: #ff0000;
@@ -332,16 +331,15 @@
         padding: 0.5rem;
     }
 
-
-        /* ===== STABLE VIDEO PLAYER - NO LAYOUT SHIFT, NO BLACK FLASH, NO JUMP ===== */
         .yt-player-page {
             position: fixed;
             inset: 0;
             background: var(--bg-primary);
-            z-index: 1000;
+            z-index: 999;
             overflow-y: auto;
             display: none;
             animation: fadeIn 0.2s ease;
+            padding-top: 100px; 
         }
         
         .yt-player-page:fullscreen {
@@ -405,7 +403,6 @@
             }
         }
         
-        /* CRITICAL FIX: Stable video container - no size change, no jump */
         .video-wrapper {
             background: #000000;
             border-radius: 20px;
@@ -420,7 +417,6 @@
             backface-visibility: hidden;
         }
         
-        /* Video element - absolutely positioned within wrapper to prevent any movement */
         .video-wrapper video {
             position: absolute;
             top: 0;
@@ -431,12 +427,10 @@
             background: #000000;
             outline: none;
             display: block;
-            /* Prevent any transform or shift */
             transform: translateZ(0);
             will-change: auto;
         }
         
-        /* Loading overlay - hidden by default, appears only during buffer */
         .video-loading-overlay {
             position: absolute;
             top: 0;
@@ -1030,8 +1024,8 @@
 let defaultLoaded = false; 
 
 const DEFAULT_CHANNEL = {
-    name: "FIFA WORLD CUP 2026",
-    url: "https://www.iatechzone.app/",
+    name: "FIFA WORLD CUP",
+    url: "#",
     logo: "https://i.ibb.co/tTvR0hRP/Fifa.png",
     isExternal: true
 };
